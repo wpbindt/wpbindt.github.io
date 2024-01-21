@@ -18,7 +18,7 @@ And the crucial rule
 
 The red functions are meant to be a metaphor for async functions, and the blue ones for non-async ones.
 
-In this allegorical language, the main problem arises almost immediately. If you have some deep call stack of blue functions, and you want to call a red one on the top of it, you're going to have to go down the call stack and change every blue function on there to a red one. Every single one. That's a lot of paperwork to go through just to call a function you wrote yourself! Effectively, **red (or async) functions will bleed all through your codebase**, and soon your entire codebase will consist of nothing but async functions.
+In this allegorical language, the main problem arises almost immediately. If you have some deep call stack of blue functions, and you want to call a red one on the top of it, you're going to have to go down the call stack and change every blue function on there to a red one. Every single one. That's a lot of paperwork to go through just to call a function! Were these functions non-colored, you could've just called it without touching the entire call stack. Effectively, **red (or async) functions will bleed all through your codebase**, and soon your entire codebase will consist of nothing but async functions.
 
 The author goes into more detail, and has more to say, but it is this specific point I want to focus on here.
 
