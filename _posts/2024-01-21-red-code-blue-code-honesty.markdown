@@ -29,6 +29,7 @@ Move from calling it red and blue, to expensive/cheap.
 Reference functional core, imperative shell.
 
 # The `IO` monad
+It's just a simile, Promises are not monads (maybe not even functorial?). Link to stackoverflow post.
 
 # Drawback: integration with sync third party libraries
 
