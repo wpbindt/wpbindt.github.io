@@ -5,7 +5,7 @@ date:   2024-01-21 19:12:38 +0100
 categories: async opinions
 ---
 
-Establish context: IO-intensive apps. Different considerations for CPU-intensive apps.
+**TL;DR:** `async/await`-style concurrency forces you to be explicit about which code does IO. That's a good thing.
 
 # Red code, blue code
 There is a [classic blog post][red-blue-original] written by Bob Nystrom where he goes into why he prefers Go's concurrency model over the `async/await` based ones found in for example Python and C#. It's an classic for a reason, and worth a read if you haven't yet. I'll summarize the main point of his argument here.
