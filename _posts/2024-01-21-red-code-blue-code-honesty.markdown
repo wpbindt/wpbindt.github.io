@@ -8,7 +8,7 @@ categories: async opinions
 **TL;DR:** `async/await`-style concurrency forces you to be explicit about which code does IO. That's a good thing.
 
 # Red code, blue code
-There is a [classic blog post][red-blue-original] written by Bob Nystrom where he goes into why he prefers Go's concurrency model over the `async/await` based ones found in for example Python and C#. It's an classic for a reason, and worth a read if you haven't yet. I'll summarize the main point of his argument here.
+There is a [classic blog post][red-blue-original] by Bob Nystrom where he explains why he prefers (for example) Go's concurrency model over the `async/await`-based ones found in for example Python and C#. It's a classic for a reason, and worth a read if you haven't yet. I'll summarize one part of his argument here.
 
 To illustrate why `async/await` is bad/annoying, he invents a convincing allegorical language. The language has so called "red functions" and "blue functions". These are just like regular functions, except they adhere to some rules, namely:
 - in defining a function, you must specify its color, like for example `red_def my_red_func(): ...` and `blue_def my_blue_func(): ...`
@@ -24,7 +24,7 @@ In this allegorical language, the main problem arises almost immediately. If you
 The author goes into more detail, and has more to say, but it is this specific point I want to focus on here.
 
 # Dropping the metaphor, or: asynchronous code
-Move from calling it red and blue, to expensive/cheap.
+While I like the colored code metaphor, I also think that by obscuring some aspects of `async/await`, it makes the argument above seem more persuasive than it deserves to be. In order to drop the metaphor, I'll give a short (and necessarily shallow) introduction to `async/await`-style concurrency. Various languages support this style of concurrency (for example Python, C# and JavaScript), and more in-depth explanations can probably be found in your language of choice. For Python, you can find one [here][python-in-depth-async-explanation].
 
 # Hexagon with red shell, blue core
 Reference functional core, imperative shell.
@@ -35,6 +35,7 @@ It's just a simile, Promises are not monads (maybe not even functorial?). Link t
 # Drawback: the terrible Hidden Fourth Rule which Forbids us From Running Blue in Red
 
 # Drawback: integration with sync third party libraries
+In my experience, this has not been much of an issue. For example, you can just do
 {% highlight python %}
 from third_party import sync_function
 
@@ -42,6 +43,7 @@ async def f():
     event_loop = asyncio.get_running_event_loop()
     return await loop.run_in_executor(None, sync_function)
 {% endhighlight %}
+There's a drawback to doing this, but I don't know what it is.
 
 # Drawback: refactoring sync legacy codebase to using async is difficult
 Pattern to include: `AsyncioProxy`?
@@ -61,3 +63,4 @@ See [this blog post][async-python-is-not-faster]. Pays to read this one carefull
 [red-blue-original]: https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/
 [async-python-is-not-faster]: https://calpaterson.com/async-python-is-not-faster.html
 [lazy-loading-is-antipattern]: https://www.mehdi-khalili.com/orm-anti-patterns-part-3-lazy-loading
+[python-in-depth-async-explanation]: https://example.com
