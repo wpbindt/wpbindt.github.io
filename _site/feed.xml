@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-01-21T19:45:00+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Homepage Wessel Bindt</title><subtitle>Homepage</subtitle><entry><title type="html">Red code, blue code, and honesty</title><link href="http://localhost:4000/async/opinions/2024/01/21/red-code-blue-code-honesty.html" rel="alternate" type="text/html" title="Red code, blue code, and honesty" /><published>2024-01-21T19:12:38+01:00</published><updated>2024-01-21T19:12:38+01:00</updated><id>http://localhost:4000/async/opinions/2024/01/21/red-code-blue-code-honesty</id><content type="html" xml:base="http://localhost:4000/async/opinions/2024/01/21/red-code-blue-code-honesty.html">&lt;p&gt;Establish context: IO-intensive apps. Different considerations for CPU-intensive apps.&lt;/p&gt;
+
+&lt;h1 id=&quot;red-code-blue-code&quot;&gt;Red code, blue code&lt;/h1&gt;
+&lt;p&gt;Reference to &lt;a href=&quot;https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/&quot;&gt;original blog&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;dropping-the-metaphor-or-asynchronous-code&quot;&gt;Dropping the metaphor, or: asynchronous code&lt;/h1&gt;
+&lt;p&gt;Move from calling it red and blue, to expensive/cheap.&lt;/p&gt;
+
+&lt;h1 id=&quot;hexagon-with-red-shell-blue-core&quot;&gt;Hexagon with red shell, blue core&lt;/h1&gt;
+&lt;p&gt;Reference functional core, imperative shell.&lt;/p&gt;
+
+&lt;h1 id=&quot;the-io-monad&quot;&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IO&lt;/code&gt; monad&lt;/h1&gt;
+
+&lt;h1 id=&quot;drawback-integration-with-sync-third-party-libraries&quot;&gt;Drawback: integration with sync third party libraries&lt;/h1&gt;
+
+&lt;h1 id=&quot;drawback-refactoring-sync-legacy-codebase-to-using-async-is-difficult&quot;&gt;Drawback: refactoring sync legacy codebase to using async is difficult&lt;/h1&gt;
+&lt;p&gt;Pattern to include: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AsyncioProxy&lt;/code&gt;
+Very incomplete:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;my_legacy_app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NoReturn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    do stuff forever
+    &quot;&quot;&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;AsyncioProxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;loop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_loop&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;loop&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;run_coro&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;coro&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_loop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;run_coroutine_threadsafe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;coro&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;result&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;my_legacy_app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;asyncio_proxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;AsyncioProxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NoReturn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    do stuff forever
+    &quot;&quot;&quot;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;async&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;my_shiny_new_async_app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NoReturn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;
+    do async stuff
+    &quot;&quot;&quot;&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;strangler_app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;NoReturn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;asyncio&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_shiny_new_async_app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h1 id=&quot;pro-forced-not-to-inject-io-code-into-domain&quot;&gt;Pro: forced not to inject I/O code into domain&lt;/h1&gt;
+&lt;p&gt;Pit of success. Reference to Mark Seemann? Who came up with this metaphor?
+Why is smart domain bad? Hard to reason about performance?&lt;/p&gt;
+
+&lt;h1 id=&quot;drawback-unnecessarily-async-standard-library-functions&quot;&gt;Drawback: unnecessarily async standard library functions?&lt;/h1&gt;
+&lt;p&gt;Async left pad? Don’t actually know examples of unnecessarily async stuff.&lt;/p&gt;
+
+&lt;h1 id=&quot;drawback-performance&quot;&gt;Drawback: performance?&lt;/h1&gt;
+&lt;p&gt;I recall seeing a blog post which bashes performance of async applications.&lt;/p&gt;</content><author><name></name></author><category term="async" /><category term="opinions" /><summary type="html">Establish context: IO-intensive apps. Different considerations for CPU-intensive apps.</summary></entry></feed>
