@@ -19,7 +19,7 @@ And the most crucial rule:
 
 The red functions are meant to be a metaphor for async functions, and the blue ones for non-async ones.
 
-In this allegorical language, the main problem arises almost immediately. If you have some deep call stack of blue functions, and you want to call a red one on the top of it, you're going to have to go down the call stack and change every blue function on there to a red one. Every single one. That's a lot of paperwork to go through just to call a function! Were these functions non-colored, you could've just called it without touching the entire call stack. Effectively, **red (or async) functions will bleed all through your codebase**, and soon your entire codebase will consist of nothing but async functions.
+In this allegorical language, the main problem arises almost immediately. If you have some deep call stack of blue functions, and you want to call a red one on the top of it, you're going to have to go down the call stack and change every blue function on there to a red one. Every single one. That's a lot of paperwork to go through just to call a function! Were these functions non-colored, you could've just called it without touching the entire call stack. Effectively, **red (or async) functions will bleed all through your codebase**, and soon your entire codebase will consist of nothing but red (async) functions.
 
 The author goes into more detail, and has more to say, but it is this specific point I want to focus on here.
 
@@ -29,46 +29,26 @@ Move from calling it red and blue, to expensive/cheap.
 # Hexagon with red shell, blue core
 Reference functional core, imperative shell.
 
-# The `IO` monad
+# A poor man's IO monad
 It's just a simile, Promises are not monads (maybe not even functorial?). Link to stackoverflow post.
 
+# Drawback: the terrible Hidden Fourth Rule which Forbids us From Running Blue in Red
+
 # Drawback: integration with sync third party libraries
+{% highlight python %}
+from third_party import sync_function
+
+async def f():
+    event_loop = asyncio.get_running_event_loop()
+    return await loop.run_in_executor(None, sync_function)
+{% endhighlight %}
 
 # Drawback: refactoring sync legacy codebase to using async is difficult
-Pattern to include: `AsyncioProxy`
-Very incomplete:
-{% highlight python %}
-def my_legacy_app() -> NoReturn:
-    """
-    do stuff forever
-    """
-{% endhighlight %}
-
-{% highlight python %}
-class AsyncioProxy:
-    def __init__(self, loop):
-        self._loop = loop
-
-    def run_coro(self, coro):
-        return self._loop.run_coroutine_threadsafe(coro).result()
-
-def my_legacy_app(asyncio_proxy: AsyncioProxy) -> NoReturn:
-    """
-    do stuff forever
-    """
-
-async def my_shiny_new_async_app() -> NoReturn:
-    """
-    do async stuff
-    """
-
-def strangler_app() -> NoReturn:
-    asyncio.run(my_shiny_new_async_app())
-{% endhighlight %}
+Pattern to include: `AsyncioProxy`?
 
 # Pro: forced not to inject I/O code into domain
 Pit of success. Reference to Mark Seemann? Who came up with this metaphor?
-Why is smart domain bad? Hard to reason about performance?
+Why is disconnected domain bad? Form of lazy loading, which has its [problems][lazy-loading-is-antipattern]. It's mentioned in Vernon's book in the Aggregates chapter, but he does not go into detail. Something about scaling and fetching large dependency trees.
 
 # Drawback: unnecessarily async standard library functions?
 Async left pad? Don't actually know examples of unnecessarily async stuff.
@@ -76,6 +56,8 @@ Async left pad? Don't actually know examples of unnecessarily async stuff.
 # Drawback: no async file I/O
 
 # Drawback: performance?
-I recall seeing a blog post which bashes performance of async applications.
+See [this blog post][async-python-is-not-faster]. Pays to read this one carefully, seems the author made some mistakes in the async code. Some issues: non-locked pool creation, database running on same machine as app (async shines when I/O slow, which is less so the case when there's no network hops), code used for serialization (and hence irrelevant to sync v async debate) differs between async and sync benchmarks.
 
 [red-blue-original]: https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/
+[async-python-is-not-faster]: https://calpaterson.com/async-python-is-not-faster.html
+[lazy-loading-is-antipattern]: https://www.mehdi-khalili.com/orm-anti-patterns-part-3-lazy-loading
