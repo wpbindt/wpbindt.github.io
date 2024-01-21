@@ -50,7 +50,20 @@
     <p>Establish context: IO-intensive apps. Different considerations for CPU-intensive apps.</p>
 
 <h1 id="red-code-blue-code">Red code, blue code</h1>
-<p>Reference to <a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">original blog</a>.</p>
+<p>There is a <a href="https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/">classic blog post</a> written by Bob Nystrom where he goes into why he prefers Go’s concurrency model over the <code class="language-plaintext highlighter-rouge">async/await</code> based ones found in for example Python and C#. It’s an classic for a reason, and worth a read if you haven’t yet. I’ll summarize the main point of his argument here.</p>
+
+<p>To illustrate why <code class="language-plaintext highlighter-rouge">async/await</code> is bad/annoying, he invents a convincing allegorical language. The language has so called “red functions” and “blue functions”. These are just like regular functions, except they adhere to some rules, namely:</p>
+<ul>
+  <li>in defining a function, you must specify its color, for example as in <code class="language-plaintext highlighter-rouge">(red) def my_red_func(): ...</code> and <code class="language-plaintext highlighter-rouge">(blue) def my_blue_func(): ...</code></li>
+  <li>to call a red/blue function, you need to use a special syntax, for example <code class="language-plaintext highlighter-rouge">red_call my_red_func()</code> or <code class="language-plaintext highlighter-rouge">blue_call my_blue_func()</code>
+And the crucial rule</li>
+  <li>you can only call red functions from within red functions. I.e.,</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="p">(</span><span class="n">blue</span><span class="p">)</span> <span class="k">def</span> <span class="nf">my_blue_func</span><span class="p">():</span>
+     <span class="n">red_call</span> <span class="n">my_red_func</span><span class="p">()</span></code></pre></figure>
+
+<p>is not allowed.</p>
 
 <h1 id="dropping-the-metaphor-or-asynchronous-code">Dropping the metaphor, or: asynchronous code</h1>
 <p>Move from calling it red and blue, to expensive/cheap.</p>
