@@ -11,10 +11,10 @@ Establish context: IO-intensive apps. Different considerations for CPU-intensive
 There is a [classic blog post][red-blue-original] written by Bob Nystrom where he goes into why he prefers Go's concurrency model over the `async/await` based ones found in for example Python and C#. It's an classic for a reason, and worth a read if you haven't yet. I'll summarize the main point of his argument here.
 
 To illustrate why `async/await` is bad/annoying, he invents a convincing allegorical language. The language has so called "red functions" and "blue functions". These are just like regular functions, except they adhere to some rules, namely:
-- in defining a function, you must specify its color, for example as in `(red) def my_red_func(): ...` and `(blue) def my_blue_func(): ...`
-- to call a red/blue function, you need to use a special syntax, for example `red_call my_red_func()` or `blue_call my_blue_func()`
+- in defining a function, you must specify its color, like for example `red_def my_red_func(): ...` and `blue_def my_blue_func(): ...`
+- to call a red/blue function, you need to use a special syntax, something like `red_call my_red_func()` or `blue_call my_blue_func()`
 And the crucial rule
-- you can only call red functions from within red functions. That is, `(blue) def my_blue_func(): red_call my_red_func()` is not allowed.
+- you can only call red functions from within red functions. That is, `blue_def my_blue_func(): red_call my_red_func()` is not allowed.
 
 The red functions are meant to be a metaphor for async functions, and the blue ones for non-async ones.
 
