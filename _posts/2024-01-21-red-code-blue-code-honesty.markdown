@@ -59,6 +59,8 @@ Why is smart domain bad? Hard to reason about performance?
 # Drawback: unnecessarily async standard library functions?
 Async left pad? Don't actually know examples of unnecessarily async stuff.
 
+# Drawback: no async file I/O
+
 # Drawback: performance?
 I recall seeing a blog post which bashes performance of async applications.
 
