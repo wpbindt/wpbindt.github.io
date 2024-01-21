@@ -26,11 +26,13 @@ The author goes into more detail, and has more to say, but it is this specific p
 # Dropping the metaphor, or: asynchronous code
 While I like the colored code metaphor, I also think that by obscuring some aspects of `async/await`, it makes the argument above seem more persuasive than it deserves to be. In order to drop the metaphor, I'll give a short (and necessarily shallow) introduction to `async/await`-style concurrency. Various languages support this style of concurrency (for example Python, C# and JavaScript), and more in-depth explanations can probably be found in your language of choice. For Python, you can find one [here][python-in-depth-async-explanation].
 
+Asynchronous programming is an example
+
 # Hexagon with red shell, blue core
 Reference functional core, imperative shell.
 
 # A poor man's IO monad
-It's just a simile, Promises are not monads (maybe not even functorial?). Link to stackoverflow post.
+It's just a simile, Promises are not monads (maybe not even functorial?). Link to stackoverflow post. Haskell has an async plugin. Are Promises really not monads, or is that just a quirk of JavaScript?
 
 # Drawback: the terrible Hidden Fourth Rule which Forbids us From Running Blue in Red
 
