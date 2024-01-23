@@ -28,40 +28,32 @@ While I like the colored code metaphor, I also think that by obscuring some aspe
 
 Asynchronous programs aim to run several procedures concurrently, and typically it works as follows. Somewhere, somehow, there is a task scheduler running, called the **event loop**. This event loop is responsible for running your async functions (or **coroutines**). When a coroutine performs some IO (call to the database, send an email, etc), it yields control back to the event loop, allowing another coroutine to continue running. The key difference from thread-based concurrency is precisely that. It is not the event loop which decides when to context switch between running coroutines, but the coroutines themselves. Yielding control to the event loop is done using the `await` keyword.
 
-In Python, a coroutine is defined using the `async` keyword. For example, in the snippet
+In Python, a coroutine is defined using the `async` keyword. Consider the snippet
 {% highlight python %}
-import asyncio
-from typing import NoReturn
-
-async def hi() -> NoReturn:
+async def hi():
     while True:
         print('hi')
         await asyncio.sleep(1.25)
 
-async def ho() -> NoReturn:
+async def ho():
     await asyncio.sleep(0.25)
     while True:
         print('ho')
         await asyncio.sleep(1.25)
-
-async def main() -> NoReturn:
-    await asyncio.gather(hi(), ho())
-
-asyncio.run(main())
 {% endhighlight %}
-the `main` coroutine uses `asyncio.gather` to concurrently run the coroutines `hi` and `ho`. When `hi` starts running, it prints `'hi'`, and then immediately yields control back to the event loop using `await asyncio.sleep(1.25)`. The coroutine `asyncio.sleep` is used here to replace some actual IO, but it functions the same. Execution for `hi` will resume after the 1.25 seconds expire. As `hi` has yielded control back to the event loop, `ho` can run. It immediately yields control to the event loop with `asyncio.sleep`. After 0.25 seconds, `ho` is ready to go again, and since there's no other coroutine holding control, it is allowed to run. It prints `'ho'`, and it yields control back tot he event loop. And so on.
+Suppose we run the coroutines `hi` and `ho` concurrently (for example using [gather][python-docs-gather]). When `hi` starts running, it prints `'hi'`, and then immediately yields control back to the event loop using `await asyncio.sleep(1.25)`. The coroutine `asyncio.sleep` is used here to replace some actual IO, but it functions the same. Execution for `hi` will resume after the 1.25 seconds expire. As `hi` has yielded control back to the event loop, `ho` can run. It immediately yields control to the event loop with `asyncio.sleep`. After 0.25 seconds, `ho` is ready to go again, and since there's no other coroutine holding control, it is allowed to run. It prints `'ho'`, and it yields control back tot he event loop. And so on.
 
-Note that in this example you can see rules 1. and 2. from the allegorical language in action. We use `async` to define our red functions (its absence defines sync functions), as in rule 1, and we have to use `await` to call our red functions, as in rule 2.
+In this example you can see rules 1 and 2 from the allegorical language in action. We use `async` to define our red functions (its absence defines sync functions), as in rule 1, and we have to use `await` to call our red functions, as in rule 2.
 
-To see rule 3. in action, consider the snippet
+To experience rule 3, consider the snippet
 {% highlight python %}
-async def hi() -> None:
+async def hi():
     print('hi')
 
-def sync_function_1() -> None:
+def sync_function_1():
     await hi()
 
-def sync_function_2() -> None:
+def sync_function_2():
     hi()
 {% endhighlight %}
 Running `sync_function_1` will raise `SyntaxError: 'await' outside async function`. Running `sync_function_2` will not raise this exception, but it will also not print `'hi'`. You can only call `async` functions from within async functions.
@@ -105,3 +97,4 @@ See [this blog post][async-python-is-not-faster]. Pays to read this one carefull
 [async-python-is-not-faster]: https://calpaterson.com/async-python-is-not-faster.html
 [lazy-loading-is-antipattern]: https://www.mehdi-khalili.com/orm-anti-patterns-part-3-lazy-loading
 [python-in-depth-async-explanation]: https://example.com
+[python-docs-gather]: https://docs.python.org/3/library/asyncio-task.html#asyncio.gather
