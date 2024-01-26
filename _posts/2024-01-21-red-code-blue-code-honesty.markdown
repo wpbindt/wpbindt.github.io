@@ -97,11 +97,23 @@ Rule 3 says essentially the following: if `f` is cheap, and `g` is expensive, th
 
 In summary: functions either do I/O or not. This is inherent to the function. Choosing whether or not to have rules 1 and 2 in your language is essentially choosing whether you want want to be honest with yourself and to make this explicit and easily inspected, or implicit and hidden in implementation. Rule 3 is a necessary consequence of choosing to have rules 1 and 2.
 
-## Hexagon with red shell, blue core
-Reference functional core, imperative shell.
-{::nomarkdown}
+## But all my code will be red!
+Not necessarily. Check out these hexagons:
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="171px" viewBox="-0.5 -0.5 171 141" content="&lt;mxfile host=&quot;app.diagrams.net&quot; modified=&quot;2024-01-26T21:46:12.798Z&quot; agent=&quot;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0&quot; etag=&quot;J4dPCS4FsGYKhAfRh0TV&quot; version=&quot;22.1.21&quot; type=&quot;google&quot;&gt;&#xA;  &lt;diagram name=&quot;Page-1&quot; id=&quot;Oouc9fD8gRl2aMlskFq-&quot;&gt;&#xA;    &lt;mxGraphModel dx=&quot;1432&quot; dy=&quot;796&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;800&quot; pageHeight=&quot;700&quot; math=&quot;0&quot; shadow=&quot;0&quot;&gt;&#xA;      &lt;root&gt;&#xA;        &lt;mxCell id=&quot;0&quot; /&gt;&#xA;        &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;&#xA;        &lt;mxCell id=&quot;c5InBF9XVYWPZ4O_JD-l-1&quot; value=&quot;&quot; style=&quot;shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#FF0000;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&#xA;          &lt;mxGeometry x=&quot;130&quot; y=&quot;110&quot; width=&quot;170&quot; height=&quot;140&quot; as=&quot;geometry&quot; /&gt;&#xA;        &lt;/mxCell&gt;&#xA;        &lt;mxCell id=&quot;c5InBF9XVYWPZ4O_JD-l-2&quot; value=&quot;&quot; style=&quot;shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#0000FF;strokeColor=#6c8ebf;&quot; vertex=&quot;1&quot; parent=&quot;1&quot;&gt;&#xA;          &lt;mxGeometry x=&quot;152.5&quot; y=&quot;130&quot; width=&quot;125&quot; height=&quot;100&quot; as=&quot;geometry&quot; /&gt;&#xA;        &lt;/mxCell&gt;&#xA;      &lt;/root&gt;&#xA;    &lt;/mxGraphModel&gt;&#xA;  &lt;/diagram&gt;&#xA;&lt;/mxfile&gt;&#xA;" onclick="(function(svg){var src=window.event.target||window.event.srcElement;while (src!=null&amp;&amp;src.nodeName.toLowerCase()!='a'){src=src.parentNode;}if(src==null){if(svg.wnd!=null&amp;&amp;!svg.wnd.closed){svg.wnd.focus();}else{var r=function(evt){if(evt.data=='ready'&amp;&amp;evt.source==svg.wnd){svg.wnd.postMessage(decodeURIComponent(svg.getAttribute('content')),'*');window.removeEventListener('message',r);}};window.addEventListener('message',r);svg.wnd=window.open('https://viewer.diagrams.net/?client=1&amp;page=0&amp;edit=_blank');}}})(this);" style="cursor:pointer;max-width:100%;max-height:141px;"><defs/><g><path d="M 20 0 L 150 0 L 170 70 L 150 140 L 20 140 L 0 70 Z" fill="#ff0000" stroke="rgb(0, 0, 0)" stroke-miterlimit="10" pointer-events="all"/><path d="M 42.5 20 L 127.5 20 L 147.5 70 L 127.5 120 L 42.5 120 L 22.5 70 Z" fill="#0000ff" stroke="#6c8ebf" stroke-miterlimit="10" pointer-events="all"/></g></svg>
-{:/}
+Suppose your application is structured along the lines [hexagonal architecture][hexagonal-architecture] or [functional core, imperative shell][functional-core] (which are similar, but different ideas). A key part of these architectures is that the dependencies flow inward. That is, your infrastructure layer (database connection, inbound rpc's, communication with your message broker) depends on your domain layer (complicated business rules and algorithms live here), rather than the other way around. The infrasture layer does I/O, is expensive, is async, and it calls the domain layer. Async functions can call non-async functions, so this makes it perfectly possible for your domain layer to be synchronous.
+
+It might look something like this:
+{% highlight python %}
+async def service_layer_function(assign_courier_to_delivery):
+    delivery = await delivery_repository.get_by_id(request.delivery_id)
+    courier = await courier_read_repository.get_by_id(request.courier_id)
+
+    delivery.assign_courier(courier)
+
+    await delivery_repository.save(delivery)
+{% endhighlight %}
+Here the I/O all happens in the repositories (which connect to the database or something like that), and the `assign_courier` method, which presumably makes some complicated business computations, is free to be synchronous.
+
 
 ## A poor man's I/O monad
 It's just a simile, Promises are not monads (maybe not even functorial?). Link to stackoverflow post. Haskell has an async plugin. Are Promises really not monads, or is that just a quirk of JavaScript?
@@ -139,4 +151,6 @@ See [this blog post][async-python-is-not-faster]. Pays to read this one carefull
 [lazy-loading-is-antipattern]: https://www.mehdi-khalili.com/orm-anti-patterns-part-3-lazy-loading
 [python-in-depth-async-explanation]: https://example.com
 [python-docs-gather]: https://docs.python.org/3/library/asyncio-task.html##asyncio.gather
+[hexagonal-architecture]: https://alistair.cockburn.us/hexagonal-architecture/
+[functional-core]: https://www.destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell
 [^1] I/O bound means that the execution time of the program is primarily made up of waiting on I/O, rather than being made up of expensive computations.
