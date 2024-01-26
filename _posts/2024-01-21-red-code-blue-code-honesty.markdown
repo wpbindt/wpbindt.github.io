@@ -107,7 +107,7 @@ The outer layer necessarily consists of async function, since they (by definitio
 For example, one part of the outer layer might look something like this:
 {% highlight python %}
 @rpc
-async def service_layer_function(request: AssignCourierToDeliveryRequest) -> None:
+async def service_layer_function(request: AssignCourierToDelivery) -> None:
     delivery = await delivery_repository.get_by_id(request.delivery_id)
     courier = await courier_read_repository.get_by_id(request.courier_id)
 
