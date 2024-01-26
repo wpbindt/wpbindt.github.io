@@ -56,6 +56,8 @@ def sync_function_2():
 {% endhighlight %}
 Running `sync_function_1` will raise `SyntaxError: 'await' outside async function`. Running `sync_function_2` will not raise this exception, but it will also not print `'hi'`. You can only call `async` functions from within async functions.
 
+# `async/await` good, actually
+The three rules are inconvenient. And when dealing with red/blue functions, that's all they are. Who cares if a function is red or blue? I just want to call it! All these rules seem to do is to make life difficult. However, when dealing with async/sync functions, they serve a purpose.
 
 # Hexagon with red shell, blue core
 Reference functional core, imperative shell.
