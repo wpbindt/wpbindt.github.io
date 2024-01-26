@@ -155,5 +155,5 @@ See [this blog post][async-python-is-not-faster]. Pays to read this one carefull
 [python-docs-gather]: https://docs.python.org/3/library/asyncio-task.html##asyncio.gather
 [hexagonal-architecture]: https://alistair.cockburn.us/hexagonal-architecture/
 [functional-core]: https://www.destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell
-[^1] I/O bound means that the execution time of the program is primarily made up of waiting on I/O, rather than being made up of expensive computations.
-[^2] A similar argument applies to applications structured according to [functional core, imperative shell][functional-core].
+[1] I/O bound means that the execution time of the program is primarily made up of waiting on I/O, rather than being made up of expensive computations.
+[2] A similar argument applies to applications structured according to [functional core, imperative shell][functional-core].
