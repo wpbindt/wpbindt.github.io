@@ -104,7 +104,7 @@ Suppose your application is structured along the lines [hexagonal architecture][
 
 It might look something like this:
 {% highlight python %}
-async def service_layer_function(assign_courier_to_delivery):
+async def service_layer_function(request: AssignCourierToDeliveryRequest) -> None:
     delivery = await delivery_repository.get_by_id(request.delivery_id)
     courier = await courier_read_repository.get_by_id(request.courier_id)
 
@@ -113,7 +113,6 @@ async def service_layer_function(assign_courier_to_delivery):
     await delivery_repository.save(delivery)
 {% endhighlight %}
 Here the I/O all happens in the repositories (which connect to the database or something like that), and the `assign_courier` method, which presumably makes some complicated business computations, is free to be synchronous.
-
 
 ## A poor man's I/O monad
 It's just a simile, Promises are not monads (maybe not even functorial?). Link to stackoverflow post. Haskell has an async plugin. Are Promises really not monads, or is that just a quirk of JavaScript?
