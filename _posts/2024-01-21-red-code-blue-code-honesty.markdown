@@ -117,8 +117,16 @@ async def service_layer_function(request: AssignCourierToDelivery) -> None:
 {% endhighlight %}
 Here the I/O all happens in the repositories (which connect to the database or something like that), and the `assign_courier` method, which presumably makes some complicated business computations, is free to be synchronous.
 
-## A poor man's I/O monad
+## A poor man's `IO`-monad
+One of the core strenghts of pure functional languages is this: there are no side effects. That is, given a function `f :: String -> Integer`, without reading the implementation you know that if you feed it a string, it will give you an integer, and it will not perform some sneaky extra action on the side. It's not going to write your mother's maiden name to a file somewhere, and it will not run `redis-cli flushall` either.
+
+To make sure programs still *do stuff*, there is the `IO`-monad. It is used to wrap types in signatures to indicate that functions perform I/O. For example, in Haskell, there's the fuction `putStr :: String -> IO ()`, which takes a string, and prints it to `stdout`. There's also `getChar :: IO Char`, which reads one character from `stdin`.
+
 It's just a simile, Promises are not monads (maybe not even functorial?). Link to stackoverflow post. Haskell has an async plugin. Are Promises really not monads, or is that just a quirk of JavaScript?
+As Peyton Jones and Wadler write in the [original paper][io-monad]:
+> Does the monadic style force one, in effect, to write a functional
+> facsimile of an imperative program, thereby losing any advantages
+> of writing in a functional language? We believe not.
 
 ## Drawback: the terrible Hidden Fourth Rule which Forbids us From Running Blue in Red
 
@@ -155,5 +163,7 @@ See [this blog post][async-python-is-not-faster]. Pays to read this one carefull
 [python-docs-gather]: https://docs.python.org/3/library/asyncio-task.html##asyncio.gather
 [hexagonal-architecture]: https://alistair.cockburn.us/hexagonal-architecture/
 [functional-core]: https://www.destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell
+[io-monad]: https://www.microsoft.com/en-us/research/wp-content/uploads/1993/01/imperative.pdf
 [1] I/O bound means that the execution time of the program is primarily made up of waiting on I/O, rather than being made up of expensive computations.
 [2] A similar argument applies to applications structured according to [functional core, imperative shell][functional-core].
+
