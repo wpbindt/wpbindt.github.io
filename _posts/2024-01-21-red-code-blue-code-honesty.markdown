@@ -127,15 +127,12 @@ The ungrounded fear that I/O-infected code will bleed all through your codebase 
 > Does the monadic style force one, in effect, to write a functional
 > facsimile of an imperative program, thereby losing any advantages
 > of writing in a functional language? We believe not.
-The strategy for avoiding this infection is similar to the one mentioned in the section above. Suppose you have some pure business domain function `algorithm :: a -> b` doing some involved computations, some I/O action `input :: IO(a)` which gets the input for this algorithm, and some output function `output :: b -> IO ()` which somehow outputs the outcome of this algorithm. Then the full program may be structured as
+
+If you're familiar with monads, the strategy for avoiding this infection is similar to the one mentioned in the section above. Suppose you have some pure business domain function `algorithm :: a -> b` doing some involved computations, some I/O action `input :: IO(a)` which gets the input for this algorithm, and some output function `output :: b -> IO ()` which somehow outputs the outcome of this algorithm. Then the full program may be structured as
 {% highlight haskell %}
 main = (algorithm <$> input) >>= output
 {% endhighlight %}
-Here, the algorithm function is still a pure function, despite the input and output functions being wrapped in the `IO`-monad.
-
-
-It's just a simile, Promises are not monads (maybe not even functorial?). Link to stackoverflow post. Haskell has an async plugin. Are Promises really not monads, or is that just a quirk of JavaScript?
-As Peyton Jones and Wadler write in the [original paper][io-monad]:
+Here, `<$>` is syntactic sugar for functorial application, and `>>=` is the bind operation. The algorithm function is still a pure function, despite the input and output functions being wrapped in the `IO`-monad.
 
 ## Drawback: the terrible Hidden Fourth Rule which Forbids us From Running Blue in Red
 
