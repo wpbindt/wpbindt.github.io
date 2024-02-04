@@ -23,3 +23,6 @@ Sagas!
 
 # I want to use Jekyll but I don't want to install Ruby
 Would love to do this in Nix, but it's hard. Give up and use Docker instead?
+
+# I don't like structural subtyping
+`Command.execute` vs `Prisoner.execute`. Python does it. Typescript does it. Bleh. Nominal typing considered beneficial.
