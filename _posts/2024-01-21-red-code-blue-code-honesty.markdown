@@ -61,7 +61,7 @@ The three rules are inconvenient. And when dealing with red/blue functions, that
 
 The main difference between synchronous and asynchronous functions is that asynchronous functions might do I/O, and synchronous functions do not. That is, in an I/O-bound system[^1], asynchronous is essentially synonymous with (potentially) **expensive**, and synchronous with (definitely) **cheap**. In contrast with color, surely these are properties we're interested in. A function `f` being expensive versus cheap makes the difference between `for _ in range(100): f()` being a bad idea versus a complete non-issue. 
 
-# motivating rule 1
+# Rule 1
 Suppose you have a function `do_stuff`, hundreds of lines long, calling various other functions with similarly well-chosen names. A colleague submits a merge request which uses this function in some loop somewhere. Is this a bad idea? Depends on whether it's cheap or expensive. How can you tell which one it is? In a non-async codebase, the only way is to read it and its dependencies, which can be immensely time-consuming and error-prone. If you're working in an async codebase, it's as simple as looking at the signature:
 {% highlight python %}
 def do_stuff():
@@ -69,7 +69,7 @@ def do_stuff():
 {% endhighlight %}
 It's synchronous, hence cheap, and it took less than a second to find out. This quick inspection is made possible by rule 1: defining an expensive function looks different from defining a cheap function.
 
-# motivating rule 2
+# Rule 2
 Suppose we can call async functions without using the `await` keyword, and suppose your colleague submits a merge request containing something like
 {% highlight python %}
 async def do_more_stuff():
@@ -92,10 +92,10 @@ async def do_more_stuff():
 {% endhighlight %}
 This makes it immediately clear that this is a pretty expensive change to make.
 
-# motivating rule 3
+# Rule 3
 Rule 3 says essentially the following: if `f` is cheap, and `g` is expensive, then if we change `f` so as to call `g`, then `f` becomes expensive. That is to say, if you call an expensive function in another function, that other function becomes expensive automatically. Or, to put it conversely, **you cannot call an expensive function from a cheap function**. Not cannot as in "it is not allowed", rather cannot as in "it's a logical contradiction". This is not a rule so much as a fact of life. A natural law. It doesn't need motivation, it just *is*.
 
-In summary: functions either do I/O or not. This is inherent to the function. Choosing whether or not to have rules 1 and 2 in your language is essentially choosing whether you want want to be honest with yourself and to make this explicit and easily inspected, or implicit and hidden in implementation. Rule 3 is a necessary consequence of choosing to have rules 1 and 2.
+**In summary**: functions either do or do not do I/O. This is inherent to the function. Choosing whether or not to have rules 1 and 2 in your language is essentially choosing whether you want want to be honest with yourself and to make this explicit and easily inspected, or implicit and hidden in implementation. Rule 3 is a necessary consequence of choosing to have rules 1 and 2.
 
 ## But all my code will be red!
 Not necessarily. Check out these hexagons:
@@ -166,7 +166,7 @@ The final line runs the log emission as a background task. Now the I/O needed fo
 This solution is still fraught with footguns. For example, all it takes for the above to break down is for some unsuspecting developer to run `getLogger('my_logger').addHandler(BlockingHandler())` somewhere else, and our logger is back to blocking the event loop.
 
 
-# Some more pros and cons
+## Some more pros and cons
 Mostly Python-specific, but may apply to other languages.
 Cons:
 - If your language didn't support `async/await` from the get-go (as is the case for Python), chances are you're dealing with an ecosystem which is not built for `async/await`. See the logging example. To integrate with non-async third parties, you have to make use of threads to emulate asynchronous code. This comes with the extra cost of context switching, and all the other drawbacks of multithreaded code.
