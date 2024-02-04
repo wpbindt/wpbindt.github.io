@@ -117,8 +117,8 @@ async def service_layer_function(request: AssignCourierToDelivery) -> None:
 {% endhighlight %}
 Here the I/O all happens in the repositories (which connect to the database or something like that), and the `assign_courier` method, which presumably makes some complicated business computations, is free to be synchronous.
 
-## Drawback: you cannot run expensive blue code in red code, but nothing prevents you from doing so
-One incontrovertible drawback that `async/await` style programming has is the following footgun. You cannot run asynchronous functions inside synchronous functions, but nothing logically prevents you from running expensive synchronous code inside asynchronous code. To give a trivial example:
+## An actual drawback
+Now that it's clear that being explicit about I/O is actually a good thing, in this section I want to talk about what I consider to be the main drawback of `async/await`-style concurrency, which is the following footgun: You cannot run asynchronous functions inside synchronous functions, but nothing logically prevents you from running expensive synchronous code inside asynchronous code. To give a trivial example:
 {% highlight python %}
 async def my_async_function():
     time.sleep(10)
