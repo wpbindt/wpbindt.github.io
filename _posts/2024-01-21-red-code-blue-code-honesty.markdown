@@ -8,7 +8,7 @@ categories: async opinions programming
 **TL;DR:** `async/await`-style concurrency forces you to be explicit about which code does I/O. That's a good thing.
 
 ## Red code, blue code
-There is a [classic blog post][red-blue-original] by Bob Nystrom explaining why he prefers (for example) Go's concurrency model over the `async/await`-based ones found in for example Python and C##. It's a classic for a reason, and worth a read. I'll summarize one part of his argument here.
+There is a [classic blog post][red-blue-original] by Bob Nystrom explaining why he prefers (for example) Go's concurrency model over the `async/await`-based ones found in for example Python and C#. It's a classic for a reason, and worth a read. I'll summarize one part of his argument here.
 
 To illustrate why `async/await` is bad/annoying, he invents a convincing allegorical language. The language has so-called "red functions" and "blue functions". These are just like regular functions, except they adhere to some rules, namely:
 1. in defining a function, you must specify its color, like for example `red_def my_red_func(): ...` and `blue_def my_blue_func(): ...`
@@ -22,7 +22,7 @@ In this allegorical language, the main problem arises almost immediately. If you
 The author goes into more detail, and has more to say, but it is this specific point I want to focus on here.
 
 ## Dropping the metaphor, or: asynchronous code
-While I like the colored code metaphor, I also think that by obscuring some aspects of `async/await`, it makes the argument above seem more persuasive than it deserves to be. In order to drop the metaphor, I'll give a short (and necessarily shallow) introduction to `async/await`-style concurrency. Various languages support this style of concurrency (for example Python, C## and JavaScript), and more in-depth explanations can probably be found in your language of choice. For Python, you can find one [here][python-in-depth-async-explanation]. Readers familiar with `async/await`-style concurrency wouldn't miss much in skipping this section.
+While I like the colored code metaphor, I also think that by obscuring some aspects of `async/await`, it makes the argument above seem more persuasive than it deserves to be. In order to drop the metaphor, I'll give a short (and necessarily shallow) introduction to `async/await`-style concurrency. Various languages support this style of concurrency (for example Python, C# and JavaScript), and more in-depth explanations can probably be found in your language of choice. For Python, you can find one [here][python-in-depth-async-explanation]. Readers familiar with `async/await`-style concurrency wouldn't miss much in skipping this section.
 
 Asynchronous programs aim to run several procedures concurrently, and typically it works as follows. Somewhere, somehow, there is a task scheduler running, called the **event loop**. This event loop is responsible for running your async functions (or **coroutines**). When a coroutine performs some I/O (call to the database, send an email, etc), it yields control back to the event loop, allowing another coroutine to continue running. The key difference from thread-based concurrency is precisely that. It is not the event loop which decides when to context switch between running coroutines, but the coroutines themselves. Yielding control to the event loop is done using the `await` keyword.
 
