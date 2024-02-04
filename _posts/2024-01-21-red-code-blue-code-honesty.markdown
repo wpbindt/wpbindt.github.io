@@ -134,7 +134,7 @@ main = (algorithm <$> input) >>= output
 {% endhighlight %}
 Here, `<$>` is syntactic sugar for functorial application, and `>>=` is the bind operation. The algorithm function is still a pure function, despite the input and output functions being wrapped in the `IO`-monad.
 
-## Drawback: the terrible Hidden Fourth Rule which Forbids us From Running Blue in Red
+## Drawback: you cannot run expensive blue code in red code, but nothing prevents you from doing so
 One incontrovertible drawback that `async/await` style programming has is the following footgun. Nothing in the model logically prevents you from running expensive *synchronous* code inside *asynchronous* code. To give a trivial example:
 {% highlight python %}
 async def my_async_function():
