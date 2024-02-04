@@ -26,3 +26,6 @@ Would love to do this in Nix, but it's hard. Give up and use Docker instead?
 
 # I don't like structural subtyping
 `Command.execute` vs `Prisoner.execute`. Python does it. Typescript does it. Bleh. Nominal typing considered beneficial.
+
+# The term "unit" test confuses me
+What's a unit?
