@@ -140,7 +140,7 @@ One incontrovertible drawback that `async/await` style programming has is the fo
 async def my_async_function():
     time.sleep(10)
 {% endhighlight %}
-Why is this bad? Well, as discussed in the section on the `async/await` paradigm, coroutines are themselves responsible for yielding control back to the event loop. Moreover, only one coroutine runs at a time, so until `my_async_function` yields back control, other coroutines are blocked from continuing. The example above would block all other coroutines from running for 10 seconds straight!
+Why is this bad? Well, as discussed in the section on the `async/await` paradigm, coroutines are themselves responsible for yielding control back to the event loop. Moreover, only one coroutine runs at a time, so until `my_async_function` yields back control, other coroutines are blocked from continuing. The example above would **block all other coroutines from running** for 10 seconds straight, which is really bad!
 
 The given example is very artificial, so it's tempting to dismiss it as an easily avoided mistake. But any synchronous code doing I/O or CPU intensive computations can cause this, and this kind of issue is hard to lint for, so it can (and will) sneak up on you. The next section gives an example I've seen in production of such a footgun going off.
 
@@ -164,7 +164,8 @@ async def my_async_function():
 {% endhighlight %}
 in their code and not think twice about it. Since we don't know what handlers are attached to the logger, each of which might do some I/O (if only our code could clearly indicate which functions do I/O and which don't!), this snippet potentially blocks the event loop.
 
-One way of doing logging in an async Python application is with `logging.handlers.QueueHandler`. Instead of emitting the log records directly to whatever log aggregator you have, `QueueHandler` puts them (non-blockingly) on a queue which some async-compatible log emitter can listen to. For example,
+# How to do logging in async Python
+For completeness' sake, let's look at how you could go about logging in an async Python application. One way of doing so is with `logging.handlers.QueueHandler`. Instead of emitting the log records directly to whatever log aggregator you have, `QueueHandler` puts them (non-blockingly) on a queue which some async-compatible log emitter can listen to. For example,
 {% highlight python %}
 logger = logging.getLogger('my_logger')
 my_log_queue = asyncio.Queue()
@@ -179,8 +180,7 @@ asyncio.create_task(handle_log_records(my_log_queue))
 {% endhighlight %}
 The final line runs the log emission as a background task. Now the I/O needed for log aggregation is running in a coroutine, and will not block other coroutines when emitting logs.
 
-This solution is still fraught with footguns. For example, all it takes for the above to break down is for some unsuspecting developer to run `getLogger('my_logger').addHandler(BlockingHandler()` somewhere else, and our logger is back to blocking the event loop.
-
+This solution is still fraught with footguns. For example, all it takes for the above to break down is for some unsuspecting developer to run `getLogger('my_logger').addHandler(BlockingHandler())` somewhere else, and our logger is back to blocking the event loop.
 
 
 ## Drawback: integration with sync third party libraries
