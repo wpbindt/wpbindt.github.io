@@ -142,10 +142,12 @@ async def my_async_function():
 {% endhighlight %}
 Why is this bad? Well, as discussed in the section on the `async/await` paradigm, coroutines are themselves responsible for yielding control back to the event loop. Moreover, only one coroutine runs at a time, so until `my_async_function` yields back control, other coroutines are blocked from continuing. The example above would block all other coroutines from running for 10 seconds straight!
 
-The given example is very artificial, so it's tempting to dismiss it as an easily avoided mistake. But any synchronous code that does I/O, or any CPU intensive synchronous code can cause this, and this kind of issue is hard to lint for, so it can (and will) sneak up on you. The next section gives an example I've seen in production of such a footgun going off.
+The given example is very artificial, so it's tempting to dismiss it as an easily avoided mistake. But any synchronous code doing I/O or CPU intensive computations can cause this, and this kind of issue is hard to lint for, so it can (and will) sneak up on you. The next section gives an example I've seen in production of such a footgun going off.
 
 # Example: logging in Python
-Logging in Python is done using `Logger` objects and `Handler` objects. The `Logger` objects are responsible for accepting logs from the developer. These `Logger` objects have a number of `Handler` objects. These `Handler` are responsible for emitting these logs to various places, such as files, Graylog, or stdout/stderr. These `Handler` objects are called handlers because they *handle* the emission of log records. Sometimes naming things well is easy! For example, in the snippet
+Logging in Python is done using `Logger` objects and `Handler` objects. The `Logger` objects are responsible for accepting logs from the developer. These `Logger` objects have a number of `Handler` objects. These `Handler` are responsible for emitting these logs to various places, such as files, Graylog, or stdout/stderr. These `Handler` objects are called handlers because they *handle* the emission of log records. Sometimes naming things well is easy!
+
+For example, in the snippet
 {% highlight python %}
 logger = logging.getLogger('my_logger')
 logger.addHandler(StreamHandler())
