@@ -15,3 +15,6 @@ Probably reduce italics, bolds, and scare quotes.
 
 # Applicative parsing in Python
 Using examples from advent of code 2023, build an applicative parsing library in Python. How to do recursive parsers? Easy in Haskell, hard in recursion-phobic Python.
+
+# Sagas in Python
+Sagas!
