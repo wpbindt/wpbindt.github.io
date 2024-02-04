@@ -7,6 +7,9 @@ categories: async opinions programming
 
 **TL;DR:** `async/await`-style concurrency forces you to be explicit about which code does I/O. That's a good thing.
 
+## Introduction
+In this post I go over one aspect of `async/await`-style concurrency that is frequently cited as a drawback, and show that it's actually big benefit (in my opinion even one of the main benefits). In short, `async/await` forces you to be explicit about I/O by requiring you to use the `async` and `await` keywords. I also discuss my main gripe with `async/await`, which is that it's easy to accidentally block the event loop.
+
 ## Red code, blue code
 There is a [classic blog post][red-blue-original] by Bob Nystrom explaining why he prefers (for example) Go's concurrency model over the `async/await`-based ones found in for example Python and C#. It's a classic for a reason, and worth a read. I'll summarize one part of his argument here.
 
@@ -118,7 +121,9 @@ async def service_layer_function(request: AssignCourierToDelivery) -> None:
 Here the I/O all happens in the repositories (which connect to the database or something like that), and the `assign_courier` method, which presumably makes some complicated business computations, is free to be synchronous.
 
 ## An actual drawback
-Now that it's clear that being explicit about I/O is actually a good thing, in this section I want to talk about what I consider to be the main drawback of `async/await`-style concurrency, which is the following footgun: You cannot run asynchronous functions inside synchronous functions, but nothing logically prevents you from running expensive synchronous code inside asynchronous code. To give a trivial example:
+Now that it's clear that being explicit about I/O is actually a good thing, in this section I want to acknowledge `async/await` is not all sunshine and roses, and talk about what I consider to be its main drawback.
+
+Asynchronous code has the following footgun: You cannot run asynchronous functions inside synchronous functions, but nothing logically prevents you from running expensive synchronous code inside asynchronous code. To give a trivial example:
 {% highlight python %}
 async def my_async_function():
     time.sleep(10)
