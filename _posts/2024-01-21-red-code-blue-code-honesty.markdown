@@ -135,6 +135,7 @@ main = (algorithm <$> input) >>= output
 Here, `<$>` is syntactic sugar for functorial application, and `>>=` is the bind operation. The algorithm function is still a pure function, despite the input and output functions being wrapped in the `IO`-monad.
 
 ## Drawback: the terrible Hidden Fourth Rule which Forbids us From Running Blue in Red
+Example: loggers in Python
 
 ## Drawback: integration with sync third party libraries
 In my experience, this has not been much of an issue. For example, you can just do
@@ -147,15 +148,9 @@ async def f():
 {% endhighlight %}
 There's a drawback to doing this, but I don't know what it is.
 
-## Drawback: refactoring sync legacy codebase to using async is difficult
-Pattern to include: `AsyncioProxy`?
-
 ## Pro: forced not to inject I/O code into domain
 Pit of success. Reference to Mark Seemann? Who came up with this metaphor?
 Why is disconnected domain bad? Form of lazy loading, which has its [problems][lazy-loading-is-antipattern]. It's mentioned in Vernon's book in the Aggregates chapter, but he does not go into detail. Something about scaling and fetching large dependency trees.
-
-## Drawback: unnecessarily async standard library functions?
-Async left pad? Don't actually know examples of unnecessarily async stuff.
 
 ## Drawback: no async file I/O
 
