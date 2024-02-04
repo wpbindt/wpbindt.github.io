@@ -128,7 +128,7 @@ Why is this bad? Well, as discussed in the section on the `async/await` paradigm
 The given example is very artificial, so it's tempting to dismiss it as an easily avoided mistake. But any synchronous code doing I/O or CPU intensive computations can cause this, and this kind of issue is hard to lint for, so it can (and will) sneak up on you. The next section gives an example I've seen in production of such a footgun going off.
 
 # Example: logging in Python
-Logging in Python is done using `Logger` objects and `Handler` objects. The `Logger` objects are responsible for accepting logs from the developer. These `Logger` objects have a number of `Handler` objects. These `Handler` are responsible for emitting these logs to various places, such as files, Graylog, or stdout/stderr. These `Handler` objects are called handlers because they *handle* the emission of log records. Sometimes naming things well is easy!
+Logging in Python is done using `Logger` objects and `Handler` objects. The `Logger` objects are responsible for accepting logs from the developer. These `Logger` objects have a number of `Handler` objects. These `Handler` are responsible for emitting these logs to various places, such as files, Graylog, or stdout/stderr. These `Handler` objects are called as such because they *handle* the emission of log records. Sometimes naming things well is easy!
 
 For example, in the snippet
 {% highlight python %}
