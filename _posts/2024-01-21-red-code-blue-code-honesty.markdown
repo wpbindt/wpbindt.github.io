@@ -166,25 +166,17 @@ The final line runs the log emission as a background task. Now the I/O needed fo
 This solution is still fraught with footguns. For example, all it takes for the above to break down is for some unsuspecting developer to run `getLogger('my_logger').addHandler(BlockingHandler())` somewhere else, and our logger is back to blocking the event loop.
 
 
-## Drawback: integration with sync third party libraries
-In my experience, this has not been much of an issue. For example, you can just do
-{% highlight python %}
-from third_party import sync_function
+# Some more pros and cons
+Mostly Python-specific, but may apply to other languages.
+Cons:
+- If your language didn't support `async/await` from the get-go (as is the case for Python), chances are you're dealing with an ecosystem which is not built for `async/await`. See the logging example. To integrate with non-async third parties, you have to make use of threads to emulate asynchronous code. This comes with the extra cost of context switching, and all the other drawbacks of multithreaded code.
+- You are limited to fairly specific IPC methods. `asyncio` is built upon the `select()` system call, which really only works for sockets.
 
-async def f():
-    event_loop = asyncio.get_running_event_loop()
-    return await loop.run_in_executor(None, sync_function)
-{% endhighlight %}
-There's a drawback to doing this, but I don't know what it is.
+Pros:
+- Pit of success: if your domain is synchronous, then doing I/O inside your domain is painful, since you have to go down the call stack and make everything async. This makes it harder to fall into such antipatterns as [lazy loading][lazy-loading-is-antipattern] or disconnected domain model.
+- Since your code is single-threaded (barring thread pool based escape hatches), you eliminate certain things which make multi-threaded code hard to reason about, such as access to shared resources.
+- Your code is more explicit about when exactly it does I/O, and that's actually a good thing.
 
-## Pro: forced not to inject I/O code into domain
-Pit of success. Reference to Mark Seemann? Who came up with this metaphor?
-Why is disconnected domain bad? Form of lazy loading, which has its [problems][lazy-loading-is-antipattern]. It's mentioned in Vernon's book in the Aggregates chapter, but he does not go into detail. Something about scaling and fetching large dependency trees.
-
-## Drawback: no async file I/O
-
-## Drawback: performance?
-See [this blog post][async-python-is-not-faster]. Pays to read this one carefully, seems the author made some mistakes in the async code. Some issues: non-locked pool creation, database running on same machine as app (async shines when I/O slow, which is less so the case when there's no network hops), code used for serialization (and hence irrelevant to sync v async debate) differs between async and sync benchmarks.
 
 [red-blue-original]: https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/
 [async-python-is-not-faster]: https://calpaterson.com/async-python-is-not-faster.html
