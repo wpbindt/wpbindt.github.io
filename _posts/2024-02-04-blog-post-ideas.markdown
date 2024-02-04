@@ -20,3 +20,6 @@ Using examples from advent of code 2023, build an applicative parsing library in
 
 # Sagas in Python
 Sagas!
+
+# I want to use Jekyll but I don't want to install Ruby
+Would love to do this in Nix, but it's hard. Give up and use Docker instead?
