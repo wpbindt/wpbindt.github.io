@@ -13,6 +13,8 @@ Add command line tool `do_i_do_ci` which analyzes some repo and tells you yes or
 
 Probably reduce italics, bolds, and scare quotes.
 
+Related: "are you agile?" "yes we run Jira"
+
 # Applicative parsing in Python
 Using examples from advent of code 2023, build an applicative parsing library in Python. How to do recursive parsers? Easy in Haskell, hard in recursion-phobic Python.
 
