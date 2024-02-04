@@ -173,7 +173,7 @@ Cons:
 - You are limited to fairly specific IPC methods. `asyncio` is built upon the `select()` system call, which really only works for sockets.
 
 Pros:
-- Pit of success: if your domain is synchronous, then doing I/O inside your domain is painful, since you have to go down the call stack and make everything async. This makes it harder to fall into such antipatterns as [lazy loading][lazy-loading-is-antipattern] or disconnected domain model.
+- Pit of success: if your domain is synchronous, then doing I/O inside your domain is painful, since you have to go down the call stack and make everything async. This makes it harder to fall into such anti-patterns as [lazy loading][lazy-loading-is-antipattern] or disconnected domain model.
 - Since your code is single-threaded (barring thread pool based escape hatches), you eliminate certain things which make multi-threaded code hard to reason about, such as access to shared resources.
 - Your code is more explicit about when exactly it does I/O, and that's actually a good thing.
 
