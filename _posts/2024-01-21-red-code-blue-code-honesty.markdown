@@ -173,6 +173,7 @@ This solution is still fraught with footguns. For example, all it takes for the 
 
 ## Some more pros and cons
 Mostly Python-specific, but may apply to other languages.
+
 Cons:
 - If your language didn't support `async/await` from the get-go (as is the case for Python), chances are you're dealing with an ecosystem which is not built for `async/await`. See the logging example. To integrate with non-async third parties, you have to make use of threads to emulate asynchronous code. This comes with the extra cost of context switching, and all the other drawbacks of multithreaded code.
 - You are limited to fairly specific IPC methods. `asyncio` is built upon the `select()` system call, which really only works for sockets.
