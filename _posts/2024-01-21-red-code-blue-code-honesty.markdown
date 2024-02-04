@@ -117,23 +117,6 @@ async def service_layer_function(request: AssignCourierToDelivery) -> None:
 {% endhighlight %}
 Here the I/O all happens in the repositories (which connect to the database or something like that), and the `assign_courier` method, which presumably makes some complicated business computations, is free to be synchronous.
 
-## A poor man's `IO`-monad
-One of the core strenghts of pure functional languages is this: there are no side effects. That is, given a function `f :: String -> Integer`, without reading the implementation you know that if you feed it a string, it will give you an integer, and it will not perform some sneaky extra action on the side. It's not going to write your mother's maiden name to a file somewhere, and it will not run `redis-cli flushall` either.
-
-To make sure programs still *do stuff*, there is the `IO`-monad. It is used to wrap types in signatures to indicate that functions perform I/O. For example, in Haskell, there's the fuction `putStr :: String -> IO ()`, which takes a string, and prints it to `stdout`. There's also `getChar :: IO Char`, which reads one character from `stdin`. In general, something of type `IO a` represents an I/O action which yields something of type `a`. The I/O monad serves to separate the impure I/O code from the pure, more easy to reason about, non-I/O code. `async/await` confers some of these benefits to imperative languages.
-
-# But all my functions will be red!
-The ungrounded fear that I/O-infected code will bleed all through your codebase is not new, and not exclusive to `async/await`. Peyton Jones and Wadler already acknowledge this fear in [this][io-monad] early paper on the I/O monad, writing
-> Does the monadic style force one, in effect, to write a functional
-> facsimile of an imperative program, thereby losing any advantages
-> of writing in a functional language? We believe not.
-
-If you're familiar with monads, the strategy for avoiding this infection is similar to the one mentioned in the section above. Suppose you have some pure business domain function `algorithm :: a -> b` doing some involved computations, some I/O action `input :: IO(a)` which gets the input for this algorithm, and some output function `output :: b -> IO ()` which somehow outputs the outcome of this algorithm. Then the full program may be structured as
-{% highlight haskell %}
-main = (algorithm <$> input) >>= output
-{% endhighlight %}
-Here, `<$>` is syntactic sugar for functorial application, and `>>=` is the bind operation. The algorithm function is still a pure function, despite the input and output functions being wrapped in the `IO`-monad.
-
 ## Drawback: you cannot run expensive blue code in red code, but nothing prevents you from doing so
 One incontrovertible drawback that `async/await` style programming has is the following footgun. Nothing in the model logically prevents you from running expensive *synchronous* code inside *asynchronous* code. To give a trivial example:
 {% highlight python %}
