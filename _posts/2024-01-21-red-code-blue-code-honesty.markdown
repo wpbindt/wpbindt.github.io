@@ -150,10 +150,36 @@ Logging in Python is done using `Logger` objects and `Handler` objects. The `Log
 For example, in the snippet
 {% highlight python %}
 logger = logging.getLogger('my_logger')
-logger.addHandler(StreamHandler())
+logger.addHandler(logging.StreamHandler())
 logger.info('hi mom')
 {% endhighlight %}
 the string `'hi mom'` is sent to stderr.
+
+A developer familiar with Python's logging functionality might put
+{% highlight python %}
+async def my_async_function():
+    ...
+    logger.info('We did the thing')
+    ...
+{% endhighlight %}
+in their code and not think twice about it. Since we don't know what handlers are attached to the logger, each of which might do some I/O (if only our code could clearly indicate which functions do I/O and which don't!), this snippet potentially blocks the event loop.
+
+One way of doing logging in an async Python application is with `logging.handlers.QueueHandler`. Instead of emitting the log records directly to whatever log aggregator you have, `QueueHandler` puts them (non-blockingly) on a queue which some async-compatible log emitter can listen to. For example,
+{% highlight python %}
+logger = logging.getLogger('my_logger')
+my_log_queue = asyncio.Queue()
+logger.addHandler(logging.handlers.QueueHandler(my_log_queue))
+
+async def handle_log_records(queue):
+    while True:
+        record = await queue.get()
+        await send_record_to_log_aggregator(record)
+
+asyncio.create_task(handle_log_records(my_log_queue))
+{% endhighlight %}
+The final line runs the log emission as a background task. Now the I/O needed for log aggregation is running in a coroutine, and will not block other coroutines when emitting logs.
+
+This solution is still fraught with footguns. For example, all it takes for the above to break down is for some unsuspecting developer to run `getLogger('my_logger').addHandler(BlockingHandler()` somewhere else, and our logger is back to blocking the event loop.
 
 
 
