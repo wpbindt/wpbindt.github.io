@@ -38,8 +38,8 @@ Sometimes this coupling is inevitable, and completely justified. For example, su
 
 Sometimes, this coupling is not justifiable. For example, suppose the hello world function `f` prints "hello world" to stdout by calling `print('hello world')` somewhere. If we change this call to `import sys; sys.stdout.write('hello world')`, obviously `f` still works. It still prints "hello world" to stdout. Now, if `test_that_f_prints_hello_world` fails (in other words, if `f` is coupled to `test_that_f_prints_hello_world1` with respect to changing `print` to `sys.stdout.write` in `f`), that's a false failure. After all, the behavior of `f` hasn't changed in any way, just its structure. It si precisely this kind of coupling which causes false failures. Moreover, in this post we'll show some methods to avoid this kind of coupling.
 
-In summary:
 Being coupled to automated tests with respect to _behavioral_ changes: inevitable, good, expected
+
 Being coupled to automated tests with respect to _structural_ changes: unnecessary, time-consuming, (rightly) reduces trust in your test suite
 
 
@@ -61,7 +61,9 @@ The key to avoiding unnecessary coupling to implementation details is the follow
 # Prefer fakes over mocks
 
 # Don't fake what you don't own
-Suppose you're implementing some public transport planning application, and your users are complaining that when they use your app they tend to forget to look outside for the weather to see if they need to bring an umbrella or whatever. You decide to help them out by adding clothing suggestions to your suggested routes. Simple enough, if your user asks for a route from A to B starting at 5:30PM, you do your usual computations, suggest them "Take bus 9 at 5:32PM", and you call out to some weather api to see if it's raining at 5:32PM. If it is, your app will suggest "Take bus 9 at 5:32PM, and bring an umbrella".
+Suppose you're implementing some public transport planning application, and your users are complaining that when they use your app they tend to forget to look outside to see if they need to bring an umbrella. You decide to help them out by adding clothing suggestions to your suggested routes. Simple enough, if your user asks for a route from A to B starting at 5:30PM, you do your usual computations, suggest them "Take bus 9 at 5:32PM", and you call out to some weather api to see if it's raining at 5:32PM. If it is, your app will suggest "Take bus 9 at 5:32PM, and bring an umbrella".
+
+Thankfully, the good folks over at `weknowtheweather.com` publish a library containing a client class `Weather` for their API. It has a method `is_it_raining`, taking a time and a location in the form of GPS coordinates, and returning a boolean which tells whether it's raining then and there. You dutifully include it in your route planning routine somewhere.
 
 
 [dont-own-dont-mock]: https://hynek.me/articles/what-to-mock-in-5-mins/
