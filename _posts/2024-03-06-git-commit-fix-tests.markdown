@@ -32,7 +32,7 @@ Here we can say that `f` is coupled to `g` with respect to name changes in `f`.
 I don't know who came up with this definition, but I learned it at [this][coupling-definition] talk by Kent Beck. There's also a chapter outlining this definition in his book _Tidy First?_
 
 ## Coupling and automated tests
-Let's see what this definition means for automated tests. It follows from the definition that `git commit -m 'fix test x'` after making a change `d` to some component `f` is a consequence of `f` being coupled to test x with respect to d.
+Let's see what this definition means for automated tests. It follows from the definition that `git commit -m 'fix test x'` after making a change `d` to some component `f` is a consequence of `f` being coupled to test `x` with respect to `d`.
 
 Sometimes this coupling is inevitable, and completely justified. For example, suppose `f` is a function which prints "hello world" to stdout, and suppose we have a test `test_that_f_prints_hello_world` which tests that it does. Then changing `f` to print "schmooby dooby" instead of "hello world" better force use to change the assert in `test_that_f_prints_hello_world` as well. That is, `f` is coupled to `test_that_f_prints_hello_world` with respect to changes in the string `f` prints to stdout, and that's inevitable, and I'm okay with that. The behavior of `f` changed, and the test which checks the behavior of `f` failed; that's just your test suite working as intended.
 
@@ -43,15 +43,29 @@ Being coupled to automated tests with respect to _behavioral_ changes: inevitabl
 Being coupled to automated tests with respect to _structural_ changes: unnecessary, time-consuming, (rightly) reduces trust in your test suite
 
 
-## Avoiding coupling to tests with respect to structural changes
+## How to avoid coupling to tests with respect to structural changes
 The key to avoiding unnecessary coupling to implementation details is the following truism: "test code is code". Any tool you have in your arsenal to achieve loose coupling in "regular" code can also be used to decouple your test suite from implementation details. Most of the strategies I'll mention ultimately follow from applying some well-known principle to automated tests.
 
 - test interfaces, not concrete implementations
-- increase the scope of your test
+- [unit-testing-overrated][increase the scope of your test]
 - spec pattern
+- [fakes-over-mocks][prefer fakes over mocks]
 - [don't fake what you don't own][dont-own-dont-mock]
+
+# Test interfaces, not concrete implementations
+
+# Increase the scope of your test
+
+# Spec pattern
+
+# Prefer fakes over mocks
+
+# Don't fake what you don't own
+Suppose you're implementing some public transport planning application, and your users are complaining that when they use your app they tend to forget to look outside for the weather to see if they need to bring an umbrella or whatever. You decide to help them out by adding clothing suggestions to your suggested routes. Simple enough, if your user asks for a route from A to B starting at 5:30PM, you do your usual computations, suggest them "Take bus 9 at 5:32PM", and you call out to some weather api to see if it's raining at 5:32PM. If it is, your app will suggest "Take bus 9 at 5:32PM, and bring an umbrella".
 
 
 [dont-own-dont-mock]: https://hynek.me/articles/what-to-mock-in-5-mins/
 [coupling-definition]: https://piped.video/watch?v=yBEcq23OgB4
+[fakes-over-mocks]: https://tyrrrz.me/blog/fakes-over-mocks
+[unit-testing-overrated]: https://tyrrrz.me/blog/unit-testing-is-overrated
 
