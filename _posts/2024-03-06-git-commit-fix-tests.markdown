@@ -13,26 +13,26 @@ This is a commit message I recently found myself writing a bunch of times when w
 ## Coupling
 There's a number of definitions of coupling floating around, and for some of them the argument in this post is valid, and for some I'm sure it isn't, so let's make sure we're on the same page when I write coupling. 
 
-Suppose we have two components f and g (they might be functions, classes, microservices, etc). Suppose that when we make a change d in f, then in order for our product to keep working, we _must_ make a change d' in g. Then (and only then) do we say that f is coupled to g with respect to the change d. For example, if f is a function that is called by g, so
+Suppose we have two components `f` and `g` (they might be functions, classes, microservices, etc). Suppose that when we make a change `d` in `f`, then in order for our product to keep working, we _must_ make a change `d`' in `g`. Then (and only then) do we say that `f` is coupled to `g` with respect to the change `d`. For example, if `f` is a function that is called by `g`, so
 {% highlight python %}
 def g():
     # do stuff
     f()
     # do more stuff
 {% endhighlight %}
-then if we change the name of f to h, we _have to_ change g to
+then if we change the name of `f` to `h`, we _have to_ change `g` to
 {% highlight python %}
 def g():
     # do stuff
     h()
     # do more stuff
 {% endhighlight %}
-Here we can say that f is coupled to g with respect to name changes in f.
+Here we can say that `f` is coupled to `g` with respect to name changes in `f`.
 
 I don't know who came up with this definition, but I learned it at [this][coupling-definition] talk by Kent Beck. There's also a chapter outlining this definition in his book _Tidy First?_
 
 ## Coupling and automated tests
-Let's see what this definition means for automated tests. It follows from the definition that `git commit -m 'fix test x'` after making a change d to some component f is a consequence of f being coupled to test x with respect to d.
+Let's see what this definition means for automated tests. It follows from the definition that `git commit -m 'fix test x'` after making a change `d` to some component `f` is a consequence of `f` being coupled to test x with respect to d.
 
 Sometimes this coupling is inevitable, and completely justified. For example, suppose `f` is a function which prints "hello world" to stdout, and suppose we have a test `test_that_f_prints_hello_world` which tests that it does. Then changing `f` to print "schmooby dooby" instead of "hello world" better force use to change the assert in `test_that_f_prints_hello_world` as well. That is, `f` is coupled to `test_that_f_prints_hello_world` with respect to changes in the string `f` prints to stdout, and that's inevitable, and I'm okay with that. The behavior of `f` changed, and the test which checks the behavior of `f` failed; that's just your test suite working as intended.
 
