@@ -127,8 +127,8 @@ def plan_route(
 {% endhighlight %}
 
 Now, if the good folks over at `weknowtheweather.com` decide to rename `is_it_raining` to `check_rain_status`, only one class changes, namely the adapter:
-class MyWeatherAdapter(MyWeather):
 {% highlight python %}
+class MyWeatherAdapter(MyWeather):
     def __init__(self, weather: Weather):
         self._weather = weather
 
