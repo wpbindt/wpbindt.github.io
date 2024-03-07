@@ -84,13 +84,16 @@ def plan_route(
 {% endhighlight %}
 with `PlannedRoute` now containing some info on umbrellas.
 
-Since you're a decent person (and more importantly, because you dislike flaky tests), you decide to write a fake version of `Weather` for use in your automated tests. That is, you go directly against the advice of this section, you fake the `Weather` class, which you do not own. Your fake implementation looks exactly like their class (it has to, otherwise you couldn't substitute it for the real thing in your tests):
+Since you're a decent person (and more importantly, because you dislike flaky tests), you decide to write a fake version of `Weather` for use in your automated tests and your build pipelines. That is, you go directly against the advice of this section, you fake the `Weather` class, which you do not own. Your fake implementation looks exactly like their class (it has to, otherwise you couldn't substitute it for the real thing in your tests):
 {% highlight python %}
 class FakeWeather:
     def is_it_raining(time: datetime, at: str) -> bool:
         ...
 {% endhighlight %}
 
+This all works quite well, your users are happy with the umbrella feature, and you forget about it for a while. Then, disaster strikes. The `weknowtheweather.com` library contains a critical security flaw, and the fix is a couple major versions ahead of the one you're using. Annoyingly, the good folks over at `weknowtheweather.com` decided to make a backwards-incompatible change in their `Weather` class. Aside from the critical security patch, the `is_it_raining` method has been renamed to `check_rain_status`. 
+
+In order for things to keep on working with this new version of the weather library, you now have to change two things: the `FakeWeather` class (`git commit -m 'Fix tests'`), and the `plan_route` routine. That is to say, your unit tests are coupled to the weather library with respect to name changes of `Weather.is_it_raining`.
 
 
 [dont-own-dont-mock]: https://hynek.me/articles/what-to-mock-in-5-mins/
