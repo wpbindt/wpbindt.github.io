@@ -65,12 +65,21 @@ Suppose you're implementing some public transport planning application, and your
 
 Thankfully, the good folks over at `weknowtheweather.com` publish a library containing a client class `Weather` for their API. It has a method `is_it_raining`, taking a time and a location in the form of GPS coordinates, and returning a boolean which tells whether it's raining then and there. You dutifully include it in your route planning routine somewhere. Maybe, on some high level it used to look something like
 {% highlight python %}
-def plan_route(from: Location, to: Location, time: datetime) -> PlannedRoute:
+def plan_route(
+    from: Location, 
+    to: Location, 
+    time: datetime,
+) -> PlannedRoute:
     ...
 {% endhighlight %}
 and after the change, it looks like
 {% highlight python %}
-def plan_route(from: Location, to: Location, time: datetime, weather_api: Weather) -> PlannedRoute:
+def plan_route(
+    from: Location, 
+    to: Location, 
+    time: datetime, 
+    weather_api: Weather,
+) -> PlannedRoute:
     ...
 {% endhighlight %}
 with `PlannedRoute` now containing some info on umbrellas.
