@@ -63,7 +63,25 @@ The key to avoiding unnecessary coupling to implementation details is the follow
 # Don't fake what you don't own
 Suppose you're implementing some public transport planning application, and your users are complaining that when they use your app they tend to forget to look outside to see if they need to bring an umbrella. You decide to help them out by adding clothing suggestions to your suggested routes. Simple enough, if your user asks for a route from A to B starting at 5:30PM, you do your usual computations, suggest them "Take bus 9 at 5:32PM", and you call out to some weather api to see if it's raining at 5:32PM. If it is, your app will suggest "Take bus 9 at 5:32PM, and bring an umbrella".
 
-Thankfully, the good folks over at `weknowtheweather.com` publish a library containing a client class `Weather` for their API. It has a method `is_it_raining`, taking a time and a location in the form of GPS coordinates, and returning a boolean which tells whether it's raining then and there. You dutifully include it in your route planning routine somewhere.
+Thankfully, the good folks over at `weknowtheweather.com` publish a library containing a client class `Weather` for their API. It has a method `is_it_raining`, taking a time and a location in the form of GPS coordinates, and returning a boolean which tells whether it's raining then and there. You dutifully include it in your route planning routine somewhere. Maybe, on some high level it used to look something like
+{% highlight python %}
+def plan_route(from: Location, to: Location, time: datetime) -> PlannedRoute:
+    ...
+{% endhighlight %}
+and after the change, it looks like
+{% highlight python %}
+def plan_route(from: Location, to: Location, time: datetime, weather_api: Weather) -> PlannedRoute:
+    ...
+{% endhighlight %}
+with `PlannedRoute` now containing some info on umbrellas.
+
+Since you're a decent person (and more importantly, because you dislike flaky tests), you decide to write a fake version of `Weather` for use in your automated tests. That is, you go directly against the advice of this section, you fake the `Weather` class, which you do not own. Your fake implementation looks exactly like their class (it has to, otherwise you couldn't substitute it for the real thing in your tests):
+{% highlight python %}
+class FakeWeather:
+    def is_it_raining(time: datetime, at: str) -> bool:
+        ...
+{% endhighlight %}
+
 
 
 [dont-own-dont-mock]: https://hynek.me/articles/what-to-mock-in-5-mins/
