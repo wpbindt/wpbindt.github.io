@@ -126,6 +126,18 @@ def plan_route(
     ...
 {% endhighlight %}
 
+Now, if the good folks over at `weknowtheweather.com` decide to rename `is_it_raining` to `check_rain_status`, only one class changes, namely the adapter:
+class MyWeatherAdapter(MyWeather):
+{% highlight python %}
+    def __init__(self, weather: Weather):
+        self._weather = weather
+
+    def is_it_raining(self, time: datetime, at: Location) -> bool:
+        gps_string = convert_our_location_to_gps_string(at)
+        return self._weather.check_rain_status(time, gps_string)
+{% endhighlight %}
+The tests stay unchanged. An added benefit is that the `plan_route` routine is unchanged as well, which is means you have a lower risk of introducing bugs there.
+
 
 [dont-own-dont-mock]: https://hynek.me/articles/what-to-mock-in-5-mins/
 [coupling-definition]: https://piped.video/watch?v=yBEcq23OgB4
