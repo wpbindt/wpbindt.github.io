@@ -115,7 +115,7 @@ class MyFakeWeather(MyWeather):
         ...
         
 {% endhighlight %}
-And instead injecting `Weather` into `plan_route`, you inject an instance of the `MyWeather` interface:
+And instead of injecting `Weather` into `plan_route`, you inject an instance of the `MyWeather` interface:
 {% highlight python %}
 def plan_route(
     from: Location, 
@@ -136,7 +136,9 @@ class MyWeatherAdapter(MyWeather):
         gps_string = convert_our_location_to_gps_string(at)
         return self._weather.check_rain_status(time, gps_string)
 {% endhighlight %}
-The tests stay unchanged. An added benefit is that the `plan_route` routine is unchanged as well, which is means you have a lower risk of introducing bugs there.
+The tests stay unchanged. An added benefit is that the `plan_route` routine is unchanged as well, which is means you have a lower risk of introducing bugs there. Fewer changes to make, happier developer.
+
+Ah but wait, it seems all is not well with this approach. Let's assume we have no static type check in our build pipeline. Nothing would've stopped us from merging the major `Weather` version bump without changing the adapter. After all, not a single test hits it.
 
 
 [dont-own-dont-mock]: https://hynek.me/articles/what-to-mock-in-5-mins/
