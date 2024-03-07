@@ -47,9 +47,9 @@ Being coupled to automated tests with respect to _structural_ changes: unnecessa
 The key to avoiding unnecessary coupling to implementation details is the following truism: "test code is code". Any tool you have in your arsenal to achieve loose coupling in "regular" code can also be used to decouple your test suite from implementation details. Most of the strategies I'll mention ultimately follow from applying some well-known principle to automated tests.
 
 - test interfaces, not concrete implementations
-- [unit-testing-overrated][increase the scope of your test]
+- [increase the scope of your test][unit-testing-overrated]
 - spec pattern
-- [fakes-over-mocks][prefer fakes over mocks]
+- [prefer fakes over mocks][fakes-over-mocks]
 - [don't fake what you don't own][dont-own-dont-mock]
 
 # Test interfaces, not concrete implementations
