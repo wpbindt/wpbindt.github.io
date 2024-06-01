@@ -6,7 +6,7 @@ categories: test opinions programming
 ---
 
 ## `git commit -m 'fix tests'
-This is a commit message I recently found myself writing a bunch of times when working in a codebase which wasn't designed with automated testing in mind. I spent a good 3 hours writing code where every commit message was some variation of "the code works, but this test doesn't". Time spent fixing false failures could be better spent adding/refining features or fixing bugs. It's a waste.
+This is a commit message I recently found myself writing a lot when working in a codebase which wasn't designed with automated testing in mind. I spent a good 3 hours writing code where every commit message was some variation of "the code works, but this test doesn't". Time spent fixing false failures could be better spent adding/refining features or fixing bugs. It's a waste.
 
 Most of the time, the cause of these false failures is unnecessary coupling between the automated tests and what they aim to test (the only reason I say "most of the time" instead of "always" is the qualifier "unnecessary"). This post lists some strategies to mitigate this kind of coupling.
 
