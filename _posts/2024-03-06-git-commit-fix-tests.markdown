@@ -8,26 +8,26 @@ categories: test opinions programming
 ## `git commit -m 'fix tests'
 This is a commit message I recently found myself writing a bunch of times when working in a codebase which wasn't designed with automated testing in mind. I spent a good 3 hours writing code where every commit message was some variation of "the code works, but this test doesn't". Time spent fixing false failures could be better spent adding/refining features or fixing bugs. It's a waste.
 
-9 times out of 10 (why yes, I did make that statistic up, but it's true in spirit) the cause of these false failures is unnecessary coupling between the automated tests and what they purport to test. This post lists some strategies to mitigate this kind of coupling.
+Most of the time, the cause of these false failures is unnecessary coupling between the automated tests and what they aim to test (the only reason I say "most of the time" instead of "always" is the qualifier "unnecessary"). This post lists some strategies to mitigate this kind of coupling.
 
 ## Coupling
-There's a number of definitions of coupling floating around, and for some of them the argument in this post is valid, and for some I'm sure it isn't, so let's make sure we're on the same page when I write coupling. 
+There's a number of definitions of coupling floating around, and for some of them the argument in this post is valid, and I'm sure there's some for which it isn't, so let's make sure we're on the same page when I write "coupling". 
 
-Suppose we have two components `f` and `g` (they might be functions, classes, microservices, etc). Suppose that when we make a change `d` in `f`, then in order for our product to keep working, we _must_ make a change `d`' in `g`. Then (and only then) do we say that `f` is coupled to `g` with respect to the change `d`. For example, if `f` is a function that is called by `g`, so
+Suppose we have two things `f` and `g` (they might be functions, classes, microservices, etc). Suppose that when we make a change `d` in `f` we _must_ make a change in `g`. Then (and only then) do we say that `f` is coupled to `g` with respect to the change `d`. For example, if `f` is a function that is called by `g`, so
 {% highlight python %}
 def g():
-    # do stuff
+    ...
     f()
-    # do more stuff
+    ...
 {% endhighlight %}
 then if we change the name of `f` to `h`, we _have to_ change `g` to
 {% highlight python %}
 def g():
-    # do stuff
+    ...
     h()
-    # do more stuff
+    ...
 {% endhighlight %}
-Here we can say that `f` is coupled to `g` with respect to name changes in `f`.
+So `f` is coupled to `g` with respect to changing the name of `f`.
 
 I don't know who came up with this definition, but I learned it at [this][coupling-definition] talk by Kent Beck. There's also a chapter outlining this definition in his book _Tidy First?_
 
