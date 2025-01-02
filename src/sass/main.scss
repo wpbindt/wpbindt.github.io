@@ -1,9 +1,14 @@
 // Variables for colors and fonts
-$primary-color: #3498db;
-$secondary-color: #2ecc71;
-$background-color: #f4f4f4;
-$text-color: #333;
+$darkest: #121212;
+$next-darkest: #1F1B24;
+$next-lightest: #6A1E55;
+$lightest: #A64D79;
+$primary-color: #ffffff;
+$secondary-color: #ffffff;
+$background-color: $darkest;
+$text-color: #E0E0E0;
 $font-family: 'Helvetica', sans-serif;
+
 
 // Reset some basic styles
 * {
@@ -16,16 +21,19 @@ $font-family: 'Helvetica', sans-serif;
 body {
   font-family: $font-family;
   background-color: $background-color;
+  justify-content: center;
+  display: flex;
   color: $text-color;
   line-height: 1.6;
   padding: 20px;
+  margin:0 auto;
 }
 
 // Title styles
 .title {
   font-size: 2.5rem;
   font-weight: bold;
-  color: $primary-color;
+  color: $next-lightest;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -41,15 +49,21 @@ body {
 
 // Section styles
 .section {
-  margin-bottom: 40px;
+  width: 80%;
+  max-width: 1000px;
+  margin: 20px 0;
   padding: 20px;
-  background-color: #ffffff;
+  background-color: $next-darkest;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
   h2 {
     font-size: 2rem;
-    color: $primary-color;
+    color: $text-color;
+  }
+
+  h3 {
+    color: $text-color;
   }
 
   p {
@@ -58,4 +72,3 @@ body {
     line-height: 1.8;
   }
 }
-
