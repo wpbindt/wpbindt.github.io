@@ -1,0 +1,61 @@
+// Variables for colors and fonts
+$primary-color: #3498db;
+$secondary-color: #2ecc71;
+$background-color: #f4f4f4;
+$text-color: #333;
+$font-family: 'Helvetica', sans-serif;
+
+// Reset some basic styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// Body styles
+body {
+  font-family: $font-family;
+  background-color: $background-color;
+  color: $text-color;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+// Title styles
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: $primary-color;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+// Subtitle styles
+.subtitle {
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: $secondary-color;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+// Section styles
+.section {
+  margin-bottom: 40px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    font-size: 2rem;
+    color: $primary-color;
+  }
+
+  p {
+    font-size: 1rem;
+    color: $text-color;
+    line-height: 1.8;
+  }
+}
+
