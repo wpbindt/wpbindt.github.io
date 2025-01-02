@@ -1,10 +1,8 @@
 $darkest: #121212;
 $next-darkest: #1F1B24;
 $next-lightest: #6A1E55;
-$lightest: #A64D79;
 $primary-color: #ffffff;
 $secondary-color: #ffffff;
-$background-color: $darkest;
 $text-color: #E0E0E0;
 $font-family: 'Helvetica', sans-serif;
 
@@ -17,7 +15,7 @@ $font-family: 'Helvetica', sans-serif;
 
 body {
   font-family: $font-family;
-  background-color: $background-color;
+  background-color: $darkest;
   justify-content: center;
   display: flex;
   color: $text-color;
