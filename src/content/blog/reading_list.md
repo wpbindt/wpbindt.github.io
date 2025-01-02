@@ -1,5 +1,5 @@
 +++
-title = "List of stuff to read"
+title = "Reading list"
 date = "2025-01-02"
 +++
 
