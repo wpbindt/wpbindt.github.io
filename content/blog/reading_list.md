@@ -3,6 +3,8 @@ title = "Reading list"
 date = "2025-01-02"
 +++
 
+## Books
+
 ### Accelerate
 It's rare to see an evidence-based book in this field, and this is one. Following the advice in this book will make you a happier developer.
 
@@ -17,6 +19,7 @@ Introduction to object-oriented design principles, using a couple of design patt
 
 ### Clean Code
 
+## Online
 ### [Manifesto for Agile Software Development](https://agilemanifesto.org/)
 It's so short, there's no excuse for not reading it. Instead of reading this here, you could've read the manifesto at least twice, probably three times by the end of this sentence. Agile is not synonymous with scrum. SAFe has nothing whatsoever to do with agile. Four times. Internalize it.
 
