@@ -65,3 +65,5 @@ Pair programming is very fun and highly efficient if done well. It is horrible a
 
 ### [Writing tests for external API calls](https://www.cosmicpython.com/blog/2020-01-25-testing_external_api_calls.html)
 This problem is interesting to me, and I don't think there's a fully satisfactory answer. I've settled on making a port out of the third party API, using a fake adapter in my app's broader test suite, and testing the real adapter using [`vcrpy`](https://vcrpy.readthedocs.io/en/latest/), and I'm pretty happy with it.
+
+### [Hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/)

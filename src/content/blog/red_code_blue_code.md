@@ -1,9 +1,7 @@
----
-layout: post
-title:  "Red code, blue code, and honesty"
-date:   2024-01-21 19:12:38 +0100
-categories: async opinions programming
----
++++
+title = "Red code, blue code, and honesty"
+date = "2024-01-21"
++++
 
 **TL;DR:** `async/await`-style concurrency forces you to be explicit about which code does I/O. That's a good thing.
 
@@ -30,7 +28,7 @@ While I like the colored code metaphor, I also think that by obscuring some aspe
 Asynchronous programs aim to run several procedures concurrently, and typically it works as follows. Somewhere, somehow, there is a task scheduler running, called the **event loop**. This event loop is responsible for running your async functions (or **coroutines**). When a coroutine performs some I/O (call to the database, send an email, etc), it yields control back to the event loop, allowing another coroutine to continue running. The key difference from thread-based concurrency is precisely that. It is not the event loop which decides when to context switch between running coroutines, but the coroutines themselves. Yielding control to the event loop is done using the `await` keyword.
 
 In Python, a coroutine is defined using the `async` keyword. Consider the snippet
-{% highlight python %}
+```python
 async def hi():
     while True:
         print('hi')
@@ -41,13 +39,13 @@ async def ho():
     while True:
         print('ho')
         await asyncio.sleep(1.25)
-{% endhighlight %}
+```
 Suppose we run the coroutines `hi` and `ho` concurrently (for example using [gather][python-docs-gather]). When `hi` starts running, it prints `'hi'`, and then immediately yields control back to the event loop using `await asyncio.sleep(1.25)`. The coroutine `asyncio.sleep` is used here to replace some actual I/O, but it functions the same. Execution for `hi` will resume after the 1.25 seconds expire. As `hi` has yielded control back to the event loop, `ho` can run. It immediately yields control to the event loop with `asyncio.sleep`. After 0.25 seconds, `ho` is ready to go again, and since there's no other coroutine holding control, it is allowed to run. It prints `'ho'`, and it yields control back tot he event loop. And so on.
 
 In this example you can see rules 1 and 2 from the allegorical language in action. We use `async` to define our red functions (its absence defines sync functions), as in rule 1, and we have to use `await` to call our red functions, as in rule 2.
 
 To experience rule 3, consider the snippet
-{% highlight python %}
+```python
 async def hi():
     print('hi')
 
@@ -56,7 +54,7 @@ def sync_function_1():
 
 def sync_function_2():
     hi()
-{% endhighlight %}
+```
 Running `sync_function_1` will raise `SyntaxError: 'await' outside async function`. Running `sync_function_2` will not raise this exception, but it will also not print `'hi'`. You can only call `async` functions from within async functions.
 
 ## Expensive and cheap functions
@@ -66,15 +64,15 @@ The main difference between synchronous and asynchronous functions is that async
 
 # Rule 1
 Suppose you have a function `do_stuff`, hundreds of lines long, calling various other functions with similarly well-chosen names. A colleague submits a merge request which uses this function in some loop somewhere. Is this a bad idea? Depends on whether it's cheap or expensive. How can you tell which one it is? In a non-async codebase, the only way is to read it and its dependencies, which can be immensely time-consuming and error-prone. If you're working in an async codebase, it's as simple as looking at the signature:
-{% highlight python %}
+```python
 def do_stuff():
     ##lots of code
-{% endhighlight %}
+```
 It's synchronous, hence cheap, and it took less than a second to find out. This quick inspection is made possible by rule 1: defining an expensive function looks different from defining a cheap function.
 
 # Rule 2
 Suppose we can call async functions without using the `await` keyword, and suppose your colleague submits a merge request containing something like
-{% highlight python %}
+```python
 async def do_more_stuff():
     ...
     for _ in range(1000):
@@ -82,9 +80,9 @@ async def do_more_stuff():
         f_2()
         f_3()
     ...
-{% endhighlight %}
+```
 Is this a bad idea from a performance perspective? Not necessarily, each of the functions `f_i` could be synchronous. But to find out, you'll have to inspect the signature of each one of them. In a language satisfying rule 2, the snippet might instead look something like
-{% highlight python %}
+```python
 async def do_more_stuff():
     ...
     for _ in range(1000):
@@ -92,7 +90,7 @@ async def do_more_stuff():
         await f_2()
         f_3()
     ...
-{% endhighlight %}
+```
 This makes it immediately clear that this is a pretty expensive change to make.
 
 # Rule 3
@@ -108,7 +106,7 @@ Suppose your application is structured along the lines of [hexagonal architectur
 The outer layer necessarily consists of async functions, since they (by definition) do I/O. The domain is called by the outer layer, but since asynchronous functions can call synchronous ones, this makes it perfectly possible for your domain layer to be completely synchronous.
 
 For example, one part of the outer layer might look something like this:
-{% highlight python %}
+```python
 @rpc
 async def service_layer_function(request: AssignCourierToDelivery) -> None:
     delivery = await delivery_repository.get_by_id(request.delivery_id)
@@ -117,17 +115,17 @@ async def service_layer_function(request: AssignCourierToDelivery) -> None:
     delivery.assign_courier(courier)
 
     await delivery_repository.save(delivery)
-{% endhighlight %}
+```
 Here the I/O all happens in the repositories (which connect to the database or something like that), and the `assign_courier` method, which presumably makes some complicated business computations, is free to be synchronous.
 
 ## An actual drawback
 Now that it's clear that being explicit about I/O is actually a good thing, in this section I want to acknowledge `async/await` is not all sunshine and roses, and talk about what I consider to be its main drawback.
 
 Asynchronous code has the following footgun: You cannot run asynchronous functions inside synchronous functions, but nothing logically prevents you from running expensive synchronous code inside asynchronous code. To give a trivial example:
-{% highlight python %}
+```python
 async def my_async_function():
     time.sleep(10)
-{% endhighlight %}
+```
 Why is this bad? Well, as discussed in the section on the `async/await` paradigm, coroutines are themselves responsible for yielding control back to the event loop. Moreover, only one coroutine runs at a time, so until `my_async_function` yields back control, other coroutines are blocked from continuing. The example above would **block all other coroutines from running** for 10 seconds straight, which is really bad!
 
 The given example is very artificial, so it's tempting to dismiss it as an easily avoided mistake. But any synchronous code doing I/O or CPU intensive computations can cause this, and this kind of issue is hard to lint for, so it can (and will) sneak up on you. The next section gives an example I've seen in production of such a footgun going off.
@@ -136,25 +134,25 @@ The given example is very artificial, so it's tempting to dismiss it as an easil
 Logging in Python is done using `Logger` objects and `Handler` objects. The `Logger` objects are responsible for accepting logs from the developer. These `Logger` objects have a number of `Handler` objects. These `Handler` are responsible for emitting these logs to various places, such as files, Graylog, or stdout/stderr. These `Handler` objects are called as such because they *handle* the emission of log records. Sometimes naming things well is easy!
 
 For example, in the snippet
-{% highlight python %}
+```python
 logger = logging.getLogger('my_logger')
 logger.addHandler(logging.StreamHandler())
 logger.info('hi mom')
-{% endhighlight %}
+```
 the string `'hi mom'` is sent to stderr.
 
 A developer familiar with Python's logging functionality might put
-{% highlight python %}
+```python
 async def my_async_function():
     ...
     logger.info('We did the thing')
     ...
-{% endhighlight %}
+```
 in their code and not think twice about it. Since we don't know what handlers are attached to the logger, each of which might do some I/O (if only our code could clearly indicate which functions do I/O and which don't!), this snippet potentially blocks the event loop.
 
 # How to do logging in async Python
 For completeness' sake, let's look at how you could go about logging in an async Python application. One way of doing so is with `logging.handlers.QueueHandler`. Instead of emitting the log records directly to whatever log aggregator you have, `QueueHandler` puts them (non-blockingly) on a queue which some async-compatible log emitter can listen to. For example,
-{% highlight python %}
+```python
 logger = logging.getLogger('my_logger')
 my_log_queue = asyncio.Queue()
 logger.addHandler(logging.handlers.QueueHandler(my_log_queue))
@@ -165,7 +163,7 @@ async def handle_log_records(queue):
         await send_record_to_log_aggregator(record)
 
 asyncio.create_task(handle_log_records(my_log_queue))
-{% endhighlight %}
+```
 The final line runs the log emission as a background task. Now the I/O needed for log aggregation is running in a coroutine, and will not block other coroutines when emitting logs.
 
 This solution is still fraught with footguns. For example, all it takes for the above to break down is for some unsuspecting developer to run `getLogger('my_logger').addHandler(BlockingHandler())` somewhere else, and our logger is back to blocking the event loop.
