@@ -1,0 +1,226 @@
+<!DOCTYPE=html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>My blog</title>
+    <link rel="stylesheet" href="https://wpbindt.github.io/main.css">
+</head>
+
+<body>
+    <section class="section">
+    <div class="container">
+        
+<h1 class="title">Parsing postal addresses with parser combinators</h1>
+<p class="subtitle"><strong>2025-01-03</strong></p>
+<p>A parser is a function which turns unstructured data (usually a string) into structured data (for example an abstract syntax tree, or a list, etc). A <strong>parser combinator</strong> is a function which combines simpler parsers into more complex ones. This post gives an example of using such parser combinators to construct a parser. We'll see that parser combinators lead to declarative parsers, mirroring almost 1-1 the Backus-Naur form of what we're trying to parse. You'll find the code for this post <a href="https://github.com/wpbindt/parsing_dutch_postal_address/blob/main/parse_postal_address.py">here</a>.</p>
+<h2 id="dutch-postal-addresses">Dutch postal addresses</h2>
+<p>The kind of strings we'll consider are a simplified form of Dutch postal addresses. Here's an example:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>TWEEDE BANANENSTRAAT 67
+</span><span>1012 AB KOMKOMMERVILLE
+</span></code></pre>
+<p>It consists of</p>
+<ul>
+<li>a street, <code>TWEEDE BANANANENSTRAAT</code>, which is a bunch of words separated by spaces;</li>
+<li>a space;</li>
+<li>a house number, <code>67</code>;</li>
+<li>a newline;</li>
+<li>a zipcode, consisting of a four-digit number <code>1012</code>, a space, and two letters <code>AB</code>;</li>
+<li>a space</li>
+<li>the name of the city, which is just a bunch of letters, <code>KOMKOMMERVILLE</code>.</li>
+</ul>
+<p>In reality, it's a little more complicated than that (for example, the two letters in the zipcode cannot be <code>SS</code>, <code>SA</code>, or <code>SD</code> because they refer to nazi organizations from WWII), but we'll consider this simplified version.</p>
+<h2 id="backus-naur-form">Backus-Naur form</h2>
+<p>In <a href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form">Backus-Naur form</a>, this language can be expressed as</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;dutch-address&gt; ::= &lt;street-address&gt; &lt;newline&gt; &lt;postal-code&gt; &lt;whitespace&gt; &lt;city-name&gt;
+</span><span>
+</span><span>&lt;street-address&gt; ::= &lt;street-name&gt; &lt;whitespace&gt; &lt;house-number&gt;
+</span><span>&lt;street-name&gt; ::= &lt;word-sequence&gt;
+</span><span>&lt;house-number&gt; ::= &lt;digit-sequence&gt;
+</span><span>
+</span><span>&lt;postal-code&gt; ::= &lt;digit-sequence&gt; &lt;whitespace&gt; &lt;letter&gt; &lt;letter&gt;
+</span><span>&lt;city-name&gt; ::= &lt;word-sequence&gt;
+</span></code></pre>
+<p>Going a bit deeper, we can specify the smaller parts, such as</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;digit-sequence&gt; ::= &lt;digit&gt; | &lt;digit&gt; &lt;digit-sequence&gt;
+</span><span>&lt;word-sequence&gt; ::= &lt;word&gt; | &lt;word&gt; &lt;whitespace&gt; &lt;word-sequence&gt;
+</span><span>&lt;word&gt; ::= &lt;letter&gt; | &lt;letter&gt; &lt;word&gt;
+</span></code></pre>
+<p>This can be read as "a digit sequence is either a single digit, or a single digit followed by a digit sequence". That is to say, a digit sequence is a positive number of digits. Similarly for word sequence and word. Going even deeper, we get to the smallest parts of the language:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;letter&gt; ::= &quot;A&quot; | &quot;B&quot; | &quot;C&quot; | &quot;D&quot; | &quot;E&quot; | &quot;F&quot; | &quot;G&quot; | &quot;H&quot; | &quot;I&quot; 
+</span><span>             | &quot;J&quot; | &quot;K&quot; | &quot;L&quot; | &quot;M&quot; | &quot;N&quot; | &quot;O&quot; | &quot;P&quot; | &quot;Q&quot; | &quot;R&quot; 
+</span><span>             | &quot;S&quot; | &quot;T&quot; | &quot;U&quot; | &quot;V&quot; | &quot;W&quot; | &quot;X&quot; | &quot;Y&quot; | &quot;Z&quot;
+</span><span>&lt;digit&gt; ::= &quot;0&quot; | &quot;1&quot; | &quot;2&quot; | &quot;3&quot; | &quot;4&quot; | &quot;5&quot; | &quot;6&quot; | &quot;7&quot; | &quot;8&quot; | &quot;9&quot;
+</span><span>&lt;whitespace&gt; ::= &quot; &quot;
+</span><span>&lt;newline&gt; ::= &quot;\n&quot;
+</span></code></pre>
+<h2 id="structured-representation-of-addresses">Structured representation of addresses</h2>
+<p>We want to parse Dutch addresses into structured data, so we'll need to have some structure we can parse them into. Here's some classes that kind of follow the structure of Dutch postal addresses:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>dataclasses </span><span style="color:#b48ead;">import </span><span>dataclass
+</span><span>
+</span><span>@</span><span style="color:#bf616a;">dataclass</span><span>(</span><span style="color:#bf616a;">frozen</span><span>=</span><span style="color:#d08770;">True</span><span>)
+</span><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">PostalCode</span><span style="color:#eff1f5;">:
+</span><span>    number_part: int
+</span><span>    letter_1: str
+</span><span>    letter_2: str
+</span><span>
+</span><span>
+</span><span>@</span><span style="color:#bf616a;">dataclass</span><span>(</span><span style="color:#bf616a;">frozen</span><span>=</span><span style="color:#d08770;">True</span><span>)
+</span><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">StreetAddress</span><span style="color:#eff1f5;">:
+</span><span>    street: str
+</span><span>    house_number: int
+</span><span>
+</span><span>
+</span><span>@</span><span style="color:#bf616a;">dataclass</span><span>(</span><span style="color:#bf616a;">frozen</span><span>=</span><span style="color:#d08770;">True</span><span>)
+</span><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">DutchAddress</span><span style="color:#eff1f5;">:
+</span><span>    street_address: StreetAddress
+</span><span>    city: str
+</span><span>    postal_code: PostalCode
+</span></code></pre>
+<p>They don't capture all the subtleties of our language (for example, the letter part of the zipcode are any two strings, both of which could contain any number of characters), but it's good enough for illustrative purposes. We could improve this by for example adding a <code>__post_init__</code> to <code>PostalCode</code>:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>@</span><span style="color:#bf616a;">dataclass</span><span>(</span><span style="color:#bf616a;">frozen</span><span>=</span><span style="color:#d08770;">True</span><span>)
+</span><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">PostalCode</span><span style="color:#eff1f5;">:
+</span><span>    number_part: int
+</span><span>    letter_1: str
+</span><span>    letter_2: str
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#96b5b4;">__post_init__</span><span>(</span><span style="color:#bf616a;">self</span><span>) -&gt; </span><span style="color:#d08770;">None</span><span>:
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#96b5b4;">len</span><span>(</span><span style="color:#bf616a;">self</span><span>.letter_1) != </span><span style="color:#d08770;">1 </span><span>or </span><span style="color:#96b5b4;">len</span><span>(</span><span style="color:#bf616a;">self</span><span>.letter_2) != </span><span style="color:#d08770;">1</span><span>:
+</span><span>            </span><span style="color:#b48ead;">raise </span><span>Exception
+</span></code></pre>
+<p>Or even better, expressing it in the type system rather than validating, by having some <code>Letter</code> class which represents one single letter (for example an enum with 26 members, which I will not write down here).</p>
+<h2 id="parsing-addresses">Parsing addresses</h2>
+<p>Now we get to writing a parser for this language using parser combinators. It makes use of a small parser combinator library I wrote, <a href="https://pypi.org/project/functional-parsing-library/"><code>functional_parsing_library</code></a>, and the code for this section can be found <a href="https://github.com/wpbindt/parsing_dutch_postal_address">here</a>, so you can play around with the parsers yourself.  We'll start at the bottom of the Backus-Naur form, and work our way up.</p>
+<p>You're encouraged to follow along in a Python interpreter and play around with the parsers we construct. Install <code>functional_parsing_library</code> with</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">pip</span><span> install functional_parsing_library==0.0.28
+</span></code></pre>
+<p>and run</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>&gt;&gt;&gt; </span><span style="color:#b48ead;">from </span><span>functional_parsing_library </span><span style="color:#b48ead;">import </span><span style="color:#d08770;">*
+</span></code></pre>
+<p>in a Python interpreter.</p>
+<h3 id="single-characters">Single characters</h3>
+<p>First we define the newline parser:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>functional_parsing_library </span><span style="color:#b48ead;">import </span><span>char
+</span><span>newline = </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#96b5b4;">\n</span><span>&#39;)
+</span></code></pre>
+<p>This creates a function <code>newline</code> with type signature</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>newline : str -&gt; ParseResults[Literal[&#39;\n&#39;]] | CouldNotParse
+</span></code></pre>
+<p>where <code>ParseResults</code> and <code>CouldNotParse</code> are defined as</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>dataclasses </span><span style="color:#b48ead;">import </span><span>dataclass
+</span><span style="color:#b48ead;">from </span><span>typing </span><span style="color:#b48ead;">import </span><span>TypeVar, Generic
+</span><span>
+</span><span>StructuredData = </span><span style="color:#bf616a;">TypeVar</span><span>(&#39;</span><span style="color:#a3be8c;">StructuredData</span><span>&#39;)
+</span><span>
+</span><span>@</span><span style="color:#bf616a;">dataclass</span><span>(</span><span style="color:#bf616a;">frozen</span><span>=</span><span style="color:#d08770;">True</span><span>)
+</span><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">ParseResults</span><span style="color:#eff1f5;">(</span><span style="color:#a3be8c;">Generic</span><span style="color:#eff1f5;">[StructuredData]):
+</span><span>    result: StructuredData
+</span><span>    remainder: str
+</span><span>
+</span><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">CouldNotParse</span><span style="color:#eff1f5;">:
+</span><span>    </span><span style="color:#b48ead;">pass
+</span></code></pre>
+<p>The function <code>newline</code> successfully parses any string <code>to_parse</code> starting with <code>'\n'</code>, resulting in</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>&gt;&gt;&gt; to_parse = &#39;</span><span style="color:#96b5b4;">\n</span><span style="color:#a3be8c;">abcd</span><span>&#39;
+</span><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">newline</span><span>(to_parse)
+</span><span style="color:#bf616a;">ParseResult</span><span>(</span><span style="color:#bf616a;">result</span><span>=&#39;</span><span style="color:#96b5b4;">\n</span><span>&#39;, </span><span style="color:#bf616a;">remainder</span><span>=&#39;</span><span style="color:#a3be8c;">abcd</span><span>&#39;)
+</span></code></pre>
+<p>and it fails to parse any string <em>not</em> starting with <code>'\n'</code>, resulting in <code>CouldNotParse</code>. Note that when <code>newline</code> successfully parses a string, it stores the remainder to be passed on to other parsers.</p>
+<p>Similarly, we can define a parser <code>whitespace</code> by</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>whitespace = </span><span style="color:#bf616a;">char</span><span>(&#39; &#39;)
+</span></code></pre>
+<h3 id="one-of-a-set-of-tokens">One of a set of tokens</h3>
+<p>Let's move up the Backus-Naur form. Next comes the parser for <code>&lt;digit&gt;</code>, which we'll call <code>digit</code>:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>digit = (
+</span><span>    </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">0</span><span>&#39;) | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">1</span><span>&#39;) | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">2</span><span>&#39;) | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">3</span><span>&#39;) | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">4</span><span>&#39;) 
+</span><span>    | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">5</span><span>&#39;) | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">6</span><span>&#39;) | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">7</span><span>&#39;) | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">8</span><span>&#39;) | </span><span style="color:#bf616a;">char</span><span>(&#39;</span><span style="color:#a3be8c;">9</span><span>&#39;)
+</span><span>)
+</span></code></pre>
+<p>Here, we encounter our first combinator <code>|</code>, which can be read as "or". That is to say, <code>digit</code> parses any string starting with <code>'0'</code>, <code>'1'</code>, ..., <code>'9'</code>, stores the first character, and passes the remainder of the string on for further parsing. It fails on any string <em>not</em> starting with a digit. Note that we've taken simpler parsers for single characters, like <code>char('0')</code>, and combined them into a more complex parser.</p>
+<p>The parser <code>letter</code> for <code>&lt;letter&gt;</code> can be defined in a simlar way, which I'll leave as an exercise for the reader.</p>
+<h3 id="sequences">Sequences</h3>
+<p>Next, there's the part about the words and word sequences. These read, for example</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;word&gt; ::= &lt;letter&gt; | &lt;letter&gt; &lt;word&gt;
+</span></code></pre>
+<p>This recursive relation is hard to express in python (<code>word = letter | (letter &amp; word)</code> will result in a <code>NameError</code> if <code>word</code> is not yet defined). But we can rewrite the definition of <code>&lt;word&gt;</code> in a kind of pseudo Backus-Naur form:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;word&gt; ::= [many] &lt;letter&gt;
+</span></code></pre>
+<p>And for this, <code>functional_parsing_library</code> has a function, <code>many</code>. It takes one parser <code>p</code> parsing strings into some type <code>T</code>, and yields a parser which turns strings into type <code>list[T]</code>. More concretely, the parser <code>many(p)</code> tries to match as many matches for <code>p</code> as possible, and stores the result in a list. For example, parsing the string <code>abc1234</code> with the parser <code>many(letter)</code> will result in</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#bf616a;">ParseResults</span><span>(</span><span style="color:#bf616a;">result</span><span>=[&#39;</span><span style="color:#a3be8c;">a</span><span>&#39;, &#39;</span><span style="color:#a3be8c;">b</span><span>&#39;, &#39;</span><span style="color:#a3be8c;">c</span><span>&#39;], </span><span style="color:#bf616a;">remainder</span><span>=&#39;</span><span style="color:#a3be8c;">1234</span><span>&#39;)
+</span></code></pre>
+<p>Now if we define <code>word = many(letter)</code>, then <code>word</code> will parse a sequence of letters into a list of characters. But this isn't quite what we want, because we want to model word just as a string. This is where mapping comes into play.</p>
+<h3 id="mapping">Mapping</h3>
+<p>If we have a function <code>f: A -&gt; B</code>, and a list <code>xs</code> of type <code>list[A]</code>, then we can get a list of type <code>list[B]</code> by applying <code>f</code> to each element of <code>xs</code> individually. In short, you run <code>list(map(f, xs))</code>. Parsers admit a similar structure. If we have a parser <code>p</code> for <code>A</code>, and a function <code>f: A -&gt; B</code>, then we can define a parser <code>fmap(f, p)</code> for <code>B</code> by the following recipe:</p>
+<ul>
+<li>parse using <code>p</code>, yielding an object <code>result</code> of type <code>A</code>;</li>
+<li>apply <code>f</code> to <code>result</code>, yielding an object of type <code>B</code>.</li>
+</ul>
+<p>The operator <code>functional_parsing_library</code> uses for this is <code>*</code>. So the parser <code>fmap(f, p)</code> can be written as <code>f * p</code>.</p>
+<p>As an example, we can look at the parser <code>many(letter)</code>. It parses strings into an object of type <code>list[str]</code>. As our function, we'll take <code>''.join</code>, which concatenates a list of strings. Now, the parser</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>word = &#39;&#39;.join * </span><span style="color:#bf616a;">many</span><span>(letter)
+</span></code></pre>
+<p>will first parse using the parser <code>many(letter)</code>, resulting in a list of characters, and then concatenate them using <code>''.join</code>, which is exactly what we want!</p>
+<p>As an exercise, covince yourself that</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>digit_sequence = int * (&#39;&#39;.join * </span><span style="color:#bf616a;">many</span><span>(digit))
+</span></code></pre>
+<p>is a parser that parses sequences of digits into integers.</p>
+<h3 id="separator-tokens">Separator tokens</h3>
+<p>Next, we can define a parser for <code>&lt;word-sequence&gt;</code> as follows:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>word_sequence = &#39; &#39;.join * </span><span style="color:#bf616a;">separated_by</span><span>(word, </span><span style="color:#bf616a;">separator</span><span>=whitespace)
+</span></code></pre>
+<p>Here, <code>separated_by</code> is a function similar to <code>many</code> in that it parses many matches for a given parser. The difference is that it also matches (and ignores) a separator character. So in this case, we match a bunch of words, separated by whitespaces, and at the end, we join them back together using <code>' '.join</code>.</p>
+<h3 id="ignoring-tokens">Ignoring tokens</h3>
+<p>Sometimes, we want to ignore tokens. For example, the definition of <code>&lt;street-address&gt;</code> reads</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;street-address&gt; ::= &lt;street-name&gt; &lt;whitespace&gt; &lt;house-number&gt;
+</span></code></pre>
+<p>Here, I really only care about the <code>&lt;street-name&gt;</code> and <code>&lt;house-number&gt;</code> parts, and the whitespace I don't really want to keep. The way to do this in <code>functional_parsing_library</code> is with the <code>&lt;</code> operator. For example,</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>word &lt; whitespace
+</span></code></pre>
+<p>will match on <code>word</code> and then <code>whitespace</code>, and then only keep the result of <code>word</code>. So in parsing the string <code>'abcd '</code>, it will match <code>'abcd'</code> to <code>word</code>, and <code>' '</code> to <code>whitespace</code>, and ultimately result in <code>'abcd'</code>. I think of <code>&lt;</code> as a little arrow saying "that one".</p>
+<p>The operator <code>&gt;</code> is defined in a similar way ("that one", but pointing to the right).</p>
+<h3 id="mapping-over-multiple-arguments">Mapping over multiple arguments</h3>
+<p>Now let's try to implement a parser for <code>&lt;street-address&gt;</code>. A street address consists of a street name, followed by a whitespace, and then a house number, and we wish to turn this into an instance of our class <code>StreetAddress</code>. We can treat <code>StreetAddress</code> as a fucntion of two arguments, and we know how to ignore the whitespace, but we don't know how to do sequential parsing yet. The operator <code>&amp;</code> is overloaded to do this:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>street_name = word_sequence
+</span><span>house_number = digit_sequence
+</span><span>street_address = StreetAddress * (street_name &lt; whitespace) &amp; (house_number)
+</span></code></pre>
+<p>So our parser parses a street name (and keeps the result), followed by a whitespace (whcih it ignores), then parses a house number, and finally applies <code>StreetAddress</code> to the two parsed objects.</p>
+<p>As an aside, under the hood the sequence is a bit different. Actually it first parses <code>street_name &lt; whitespace)</code>, then already it partially applies <code>StreetAddress</code> to yield a function</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>int -&gt; StreetAddress
+</span></code></pre>
+<p>by filling in the <code>street_name</code> argument. Then it parses <code>house_number</code>, to which we finally apply the <code>int -&gt; StreetAddress</code> function to get a <code>StreetAddress</code>. In particular, the statement</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>(street_name &lt; newline) &amp; house_number
+</span></code></pre>
+<p>does not by itself make sense, because we don't know how to combine the string resulting from the left parser with the integer resulting from the right parser. Only when we specify how to combine them (in our case, apply <code>StreetAddress</code>) is the expression valid.</p>
+<p>As an exercise, implement a parser for <code>&lt;postal-code&gt;</code>. If you get stuck, an implementation can be found <a href="https://github.com/wpbindt/parsing_dutch_postal_address">here</a>.</p>
+<h2 id="the-full-parser">The full parser</h2>
+<p>Finally, we are ready to combine our smaller parsers into a full parser for Dutch addresses:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>dutch_address = DutchAddress * (street_address &lt; newline) &amp; (postal_code &lt; whitespace) &amp; city_name
+</span></code></pre>
+<p>In words, parse a street address, followed by a newline, then parse a postal code, followed by a whitespace, and then parse a city name. Finally, apply <code>DutchAddress</code> to the result. And indeed, running this (which you can do <a href="https://github.com/wpbindt/parsing_dutch_postal_address">here</a>) on our example string yields:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span>&gt;&gt;&gt; </span><span style="color:#bf616a;">dutch_address</span><span>(&#39;</span><span style="color:#a3be8c;">TWEEDE BANANENSTRAAT 67</span><span style="color:#96b5b4;">\n</span><span style="color:#a3be8c;">1012 AB KOMKOMMERVILLE</span><span>&#39;).result
+</span><span style="color:#bf616a;">DutchAddress</span><span>(
+</span><span>    </span><span style="color:#bf616a;">street_address</span><span>=</span><span style="color:#bf616a;">StreetAddress</span><span>(
+</span><span>        </span><span style="color:#bf616a;">street</span><span>=&#39;</span><span style="color:#a3be8c;">TWEEDE BANANENSTRAAT</span><span>&#39;,
+</span><span>        </span><span style="color:#bf616a;">house_number</span><span>=</span><span style="color:#d08770;">67
+</span><span>    ),
+</span><span>    </span><span style="color:#bf616a;">city</span><span>=</span><span style="color:#bf616a;">PostalCode</span><span>(
+</span><span>        </span><span style="color:#bf616a;">number_part</span><span>=</span><span style="color:#d08770;">1012</span><span>,
+</span><span>        </span><span style="color:#bf616a;">letter_1</span><span>=&#39;</span><span style="color:#a3be8c;">A</span><span>&#39;,
+</span><span>        </span><span style="color:#bf616a;">letter_2</span><span>=&#39;</span><span style="color:#a3be8c;">B</span><span>&#39;
+</span><span>    ),
+</span><span>    </span><span style="color:#bf616a;">postal_code</span><span>=&#39;</span><span style="color:#a3be8c;">KOMKOMMERVILLE</span><span>&#39;
+</span><span>)
+</span></code></pre>
+<p>Aside from some details, implementing our parser boils down to copying the Backus-Naur form, and flipping it upside down. It's very declarative, and I personally prefer it to other methods. For example, a potential regular expression for parsing these addresses is</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>([[A-Z]+ ]*[A-Z]+|[A-Z]+) (\d+)\n(\d\d\d\d) ([A-Z][A-Z]) ([[A-Z] ]*[A-Z]+|[A-Z]+)
+</span></code></pre>
+<p>and that makes me unhappy. Probably this expression is wrong, but I have funner things to do with my life than debugging regular expressions, for example filing my income tax.</p>
+<p>As an exercise, try amending this parser to disallow leading 0s in the zipcode. Maybe consider using parser combinators the next time you find yourself in a parsing mood (<a href="https://adventofcode.com">advent of code</a> is usually a nice place to try).</p>
+
+
+    </div>
+    </section>
+</body>
+
+</html>
