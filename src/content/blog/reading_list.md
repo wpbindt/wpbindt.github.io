@@ -15,6 +15,8 @@ An approachable introduction to various ideas from domain-driven design, in Pyth
 ### Head-first design patterns
 Introduction to object-oriented design principles, using a couple of design patterns to illustrate them.
 
+### Clean Code
+
 ### [Manifesto for Agile Software Development](https://agilemanifesto.org/)
 It's so short, there's no excuse for not reading it. Instead of reading this here, you could've read the manifesto at least twice, probably three times by the end of this sentence. Agile is not synonymous with scrum. SAFe has nothing whatsoever to do with agile. Four times. Internalize it.
 
@@ -42,7 +44,7 @@ def sort(xs: list[int]) -> list[int]:
 ```
 A high-extent test suite would write tests for just the `sort` function. A low-extent test suite would have a test for `sort`, and then have narrower, more focused tests for `prep_array` and `finalize`. Now suppose you realize the `sort` function would be much more understandable in three steps, `bumfuzzle_array`, `discombobulate_array`, and `finalize_discombobulated`. If you do this refactor, the high extent test suite stays green (since it only tests `sort`), and the low extent suite fails (it tests `prep_array` and `finalize` individually). The closer you test to the boundary (the higher the extent of your test), the lower the odds that it tests structure rather than just behavior. When possible, prefer tests with high extent.
 
-This example also illustrates a drawback of the high extent approach. Suppose we introduce a bug in `prep_array` (that is to say, a change which breaks `sort`). In the high-extent test suite, all our test suite will tell us at first glance is that there's a bug somewhere in `sort`, but not whether it's in `prep_array` or `finalize`. The low extent test suite will tell you right away that the bug is somewhere in `prep_array`. This is a definite drawback of the high-extent approach, and actually the reason the author gives for preferring the low-extent approach. I don't really have an argument, but I've found in trying both approaches that the good that test specificity does is far outweighed by the harm that false failures do.
+This example also illustrates a drawback of the high extent approach. Suppose we introduce a bug in `prep_array` (that is to say, a change which breaks `sort`). In the high-extent test suite, all our test suite will tell us at first glance is that there's a bug somewhere in `sort`, but not whether it's in `prep_array` or `finalize`. The low extent test suite will tell you right away that the bug is somewhere in `prep_array`. This is a definite drawback of the high-extent approach, and actually the reason the author gives for preferring the low-extent approach. I don't really have an argument, but I've found in trying both approaches that the good that test specificity does is outweighed by the harm that false failures do.
 
 ### [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
 
