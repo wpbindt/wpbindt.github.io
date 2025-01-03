@@ -3,7 +3,7 @@ title = "Parsing postal addresses with parser combinators"
 date = "2025-01-03"
 +++
 
-A parser is a function which turns unstructured data (usually a string) into structured data (for example an abstract syntax tree, or a list, etc). A __parser combinator__ is a function which combines simpler parsers into more complex ones. This post gives an example of using such parser combinators to construct a parser. We'll see that parser combinators lead to declarative parsers, mirroring almost 1-1 the Backus-Naur form of what we're trying to parse.
+A parser is a function which turns unstructured data (usually a string) into structured data (for example an abstract syntax tree, or a list, etc). A __parser combinator__ is a function which combines simpler parsers into more complex ones. This post gives an example of using such parser combinators to construct a parser. We'll see that parser combinators lead to declarative parsers, mirroring almost 1-1 the Backus-Naur form of what we're trying to parse. You'll find the code for this post [here](https://github.com/wpbindt/parsing_dutch_postal_address/blob/main/parse_postal_address.py).
 
 ## Dutch postal addresses
 The kind of strings we'll consider are a simplified form of Dutch postal addresses. Here's an example:
@@ -51,7 +51,7 @@ This can be read as "a digit sequence is either a single digit, or a single digi
 ```
 
 ## Structured representation of addresses
-We want to parse Dutch addresses into structured data, so we'll need to have some structure we can parse them _into_. Here's some classes that kind of follow the structure of Dutch postal addresses:
+We want to parse Dutch addresses into structured data, so we'll need to have some structure we can parse them into. Here's some classes that kind of follow the structure of Dutch postal addresses:
 ```python
 from dataclasses import dataclass
 
@@ -97,7 +97,7 @@ pip install functional_parsing_library==0.0.28
 ```
 and run
 ```python
->>> from functional parsing_library import *
+>>> from functional_parsing_library import *
 ```
 in a Python interpreter.
 
