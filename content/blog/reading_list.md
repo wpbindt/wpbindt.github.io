@@ -18,6 +18,7 @@ An approachable introduction to various ideas from domain-driven design, in Pyth
 Introduction to object-oriented design principles, using a couple of design patterns to illustrate them.
 
 ### Clean Code
+If there's one chapter you read, let it be the chapter on wrapping third party dependencies. Take the "short methods" advice with a grain of salt, but not too much salt.
 
 ## Online
 
@@ -51,6 +52,7 @@ A high-extent test suite would write tests for just the `sort` function. A low-e
 This example also illustrates a drawback of the high extent approach. Suppose we introduce a bug in `prep_array` (that is to say, a change which breaks `sort`). In the high-extent test suite, all our test suite will tell us at first glance is that there's a bug somewhere in `sort`, but not whether it's in `prep_array` or `finalize`. The low extent test suite will tell you right away that the bug is somewhere in `prep_array`. This is a definite drawback of the high-extent approach, and actually the reason the author gives for preferring the low-extent approach. I don't really have an argument, but I've found in trying both approaches that the good that test specificity does is outweighed by the harm that false failures do.
 
 ### [Parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+There is always a schema, even if you put your fingers in your ears and go "LA LA LA LA". Having your code reflect this schema, and checking it at the boundary of your system, is a good thing. I much prefer it to getting a call at 3 in the morning from a customer saying that some very strange looking data has leaked into their database.
 
 ### [You'll regret using natural keys](https://blog.ploeh.dk/2024/06/03/youll-regret-using-natural-keys/)
 This post gives reasons why using synthetic primary keys (a uuid, some increasing sequence) is a better idea than using natural ones (a social security number, an email address). For me, it boils down to the following facts:
@@ -67,12 +69,17 @@ Pair programming is very fun and highly efficient if done well. It is horrible a
 
 ### [The Ideal Domain-Driven Design Aggregate Store?](https://kalele.io/the-ideal-domain-driven-design-aggregate-store/)
 
+A demonstration that you don't need a NoSQL store to store full aggregates. The binary JSON type in PostgreSQL gets you a long way.
+
 ### [Writing tests for external API calls](https://www.cosmicpython.com/blog/2020-01-25-testing_external_api_calls.html)
 This problem is interesting to me, and I don't think there's a fully satisfactory answer. I've settled on making a port out of the third party API, using a fake adapter in my app's broader test suite, and testing the real adapter using [`vcrpy`](https://vcrpy.readthedocs.io/en/latest/), and I'm pretty happy with it.
 
 ### [Hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/)
-
+Also known as an onion architecture, or the ports and adapters architecture. Roughly, the idea is that your domain is at the center of your app, and all else depends on it. So the dependencies flow from the boundary of your app towards your domain. Your domain does not know what a SQL is.
 
 ## Videos
 ### [Missing semester, git lecture](https://youtu.be/2sjqTHE0zok?si=NHen99qWwpVuZ-lP)
 In general, the lectures from the missing semester are good, but especially the git lecture is very useful to watch. The [course homepage](https://missing.csail.mit.edu/) also contains notes for all of the lectures, which include hands-on exercises.
+
+### [Microservices megadisasters](https://www.youtube.com/watch?v=gfh-VCTwMw8)
+Goes into common (and deadly) deadly mistakes when people build microservices. Good illustration of why asynchronous communication should be preferred in a distributed architecture.
