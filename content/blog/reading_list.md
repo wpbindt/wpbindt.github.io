@@ -83,3 +83,6 @@ In general, the lectures from the missing semester are good, but especially the 
 
 ### [Microservices megadisasters](https://www.youtube.com/watch?v=gfh-VCTwMw8)
 Goes into common (and deadly) deadly mistakes when people build microservices. Good illustration of why asynchronous communication should be preferred in a distributed architecture.
+
+### [Stop using mocks](https://www.youtube.com/watch?v=rk-f3B-eMkI)
+Through an extended example, Harry Percival (one of the cosmic Python guys) demonstrates that by adopting a more detroit style approach to testing, you get more readable and more maintainable tests, and more importantly, tests which are less sensitive to structure changes (which is a good thing, see the Test Desiderata video series by Kent Beck). Well worth a watch if your go-to approach in faking out third parties is constructing a mock hell.
