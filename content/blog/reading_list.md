@@ -82,7 +82,10 @@ Also known as an onion architecture, or the ports and adapters architecture. Rou
 In general, the lectures from the missing semester are good, but especially the git lecture is very useful to watch. The [course homepage](https://missing.csail.mit.edu/) also contains notes for all of the lectures, which include hands-on exercises.
 
 ### [Microservices megadisasters](https://www.youtube.com/watch?v=gfh-VCTwMw8)
-Goes into common (and deadly) deadly mistakes when people build microservices. Good illustration of why asynchronous communication should be preferred in a distributed architecture.
+Goes into common (and deadly) mistakes when people build microservices. Good illustration of why asynchronous communication should be preferred in a distributed architecture.
 
 ### [Stop using mocks](https://www.youtube.com/watch?v=rk-f3B-eMkI)
 Through an extended example, Harry Percival (one of the cosmic Python guys) demonstrates that by adopting a more detroit style approach to testing, you get more readable and more maintainable tests, and more importantly, tests which are less sensitive to structure changes (which is a good thing, see the Test Desiderata video series by Kent Beck). Well worth a watch if your go-to approach in faking out third parties is constructing a mock hell.
+
+### [Test desiderata](https://youtube.com/playlist?list=PLlmVY7qtgT_lkbrk9iZNizp978mVzpBKl&si=EoyILEphHKKrcsIb)
+In this series of shorts, Kent Beck goes over a number of good properties tests should have. In short, tests should be behavior-sensitive, structure-\emph{in}sensitive, readable, writable, fast, deterministic, automated, isolated, composable, specific, production-predictive, and inspiring (confidence). These are not pies in the sky. These properties can and should be achieved. They were planning on doing a bonus episode on tradeoffs, but judging from the time these videos came out, a pandemic prevented them from doing so. Beck also wrote a [post](https://medium.com/@kentbeck_7670/test-desiderata-94150638a4b3) on Medium about this.
