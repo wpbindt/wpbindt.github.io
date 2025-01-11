@@ -20,6 +20,7 @@ Introduction to object-oriented design principles, using a couple of design patt
 ### Clean Code
 
 ## Online
+
 ### [Manifesto for Agile Software Development](https://agilemanifesto.org/)
 It's so short, there's no excuse for not reading it. Instead of reading this here, you could've read the manifesto at least twice, probably three times by the end of this sentence. Agile is not synonymous with scrum. SAFe has nothing whatsoever to do with agile. Four times. Internalize it.
 
@@ -70,3 +71,8 @@ Pair programming is very fun and highly efficient if done well. It is horrible a
 This problem is interesting to me, and I don't think there's a fully satisfactory answer. I've settled on making a port out of the third party API, using a fake adapter in my app's broader test suite, and testing the real adapter using [`vcrpy`](https://vcrpy.readthedocs.io/en/latest/), and I'm pretty happy with it.
 
 ### [Hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/)
+
+
+## Videos
+### [Missing semester, git lecture](https://youtu.be/2sjqTHE0zok?si=NHen99qWwpVuZ-lP)
+In general, the lectures from the missing semester are good, but especially the git lecture is very useful to watch. The [course homepage](https://missing.csail.mit.edu/) also contains notes for all of the lectures, which include hands-on exercises.
