@@ -77,6 +77,9 @@ This problem is interesting to me, and I don't think there's a fully satisfactor
 ### [Hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/)
 Also known as an onion architecture, or the ports and adapters architecture. Roughly, the idea is that your domain is at the center of your app, and all else depends on it. So the dependencies flow from the boundary of your app towards your domain. Your domain does not know what a SQL is.
 
+### [Jepsen analyses](https://jepsen.io/analyses)
+Fun analyses on the correctness of databases. This is the right place to find out where your personal database vendor is lacking, because some database vendors have been less than honest in their documentation in representing for example their ACID-compliance, even after being called out by a Jepsen analysis. These are serious analyses, but they're written with a sense of humor.
+
 ## Videos
 ### [Missing semester, git lecture](https://youtu.be/2sjqTHE0zok?si=NHen99qWwpVuZ-lP)
 In general, the lectures from the missing semester are good, but especially the git lecture is very useful to watch. The [course homepage](https://missing.csail.mit.edu/) also contains notes for all of the lectures, which include hands-on exercises.
