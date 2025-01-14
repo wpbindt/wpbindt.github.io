@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://wpbindt.github.io/</loc>
+    </url>
+    <url>
+        <loc>https://wpbindt.github.io/blog/</loc>
+    </url>
+    <url>
+        <loc>https://wpbindt.github.io/blog/git-commit-fix-tests/</loc>
+        <lastmod>2024-03-06</lastmod>
+    </url>
+    <url>
+        <loc>https://wpbindt.github.io/blog/indexes-tutorial/</loc>
+        <lastmod>2025-01-04</lastmod>
+    </url>
+    <url>
+        <loc>https://wpbindt.github.io/blog/parsing-addresses/</loc>
+        <lastmod>2025-01-03</lastmod>
+    </url>
+    <url>
+        <loc>https://wpbindt.github.io/blog/reading-list/</loc>
+        <lastmod>2025-01-02</lastmod>
+    </url>
+    <url>
+        <loc>https://wpbindt.github.io/blog/red-code-blue-code/</loc>
+        <lastmod>2024-01-21</lastmod>
+    </url>
+</urlset>

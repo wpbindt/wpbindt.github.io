@@ -1,0 +1,126 @@
+<!DOCTYPE=html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>My blog</title>
+    <link rel="stylesheet" href="https://wpbindt.github.io/main.css">
+</head>
+
+<body>
+    <section class="section">
+    <div class="container">
+        
+<h1 class="title">`git commit -m &#x27;fix tests&#x27;`</h1>
+<p class="subtitle"><strong>2024-03-06</strong></p>
+<p>This is a commit message I recently found myself writing a lot when working in a codebase which wasn't designed with automated testing in mind. I spent a good 3 hours writing code where every commit message was some variation of "the code works, but this test doesn't". Time spent fixing false failures could be better spent adding/refining features or fixing bugs. It's a waste.</p>
+<p>Most of the time, the cause of these false failures is unnecessary coupling between the automated tests and what they aim to test. This post lists some strategies to mitigate this kind of coupling.</p>
+<h2 id="coupling">Coupling</h2>
+<p>There's a number of definitions of coupling floating around, and for some of them the argument in this post is valid, and I'm sure there's some for which it isn't, so let's make sure we're on the same page when I write "coupling".</p>
+<p>Suppose we have two things <code>f</code> and <code>g</code> (they might be functions, classes, microservices, etc). Suppose that when we make a change <code>d</code> in <code>f</code> we <em>must</em> make a change in <code>g</code>. Then (and only then) do we say that <code>f</code> is coupled to <code>g</code> with respect to the change <code>d</code>. For example, if <code>f</code> is a function that is called by <code>g</code>, so</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">g</span><span>():
+</span><span>    </span><span style="color:#d08770;">...
+</span><span>    </span><span style="color:#bf616a;">f</span><span>()
+</span><span>    </span><span style="color:#d08770;">...
+</span></code></pre>
+<p>then if we change the name of <code>f</code> to <code>h</code>, we <em>have to</em> change <code>g</code> to</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">g</span><span>():
+</span><span>    </span><span style="color:#d08770;">...
+</span><span>    </span><span style="color:#bf616a;">h</span><span>()
+</span><span>    </span><span style="color:#d08770;">...
+</span></code></pre>
+<p>So <code>f</code> is coupled to <code>g</code> with respect to changing the name of <code>f</code>.</p>
+<p>I don't know who came up with this definition, but I learned it at <a href="https://piped.video/watch?v=yBEcq23OgB4">this</a> talk by Kent Beck. There's also a chapter outlining this definition in his book <em>Tidy First?</em></p>
+<h2 id="coupling-and-automated-tests">Coupling and automated tests</h2>
+<p>Let's see what this definition means for automated tests. It follows from the definition that <code>git commit -m 'fix test x'</code> after making a change <code>d</code> to some component <code>f</code> is a consequence of <code>f</code> being coupled to test <code>x</code> with respect to <code>d</code>.</p>
+<p>Sometimes this coupling is inevitable, and completely justified. For example, suppose <code>f</code> is a function which prints "hello world" to stdout, and suppose we have a test <code>test_that_f_prints_hello_world</code> which tests that it does. Then changing <code>f</code> to print "schmooby dooby" instead of "hello world" better force use to change the assert in <code>test_that_f_prints_hello_world</code> as well. That is, <code>f</code> is coupled to <code>test_that_f_prints_hello_world</code> with respect to changes in the string <code>f</code> prints to stdout, and that's inevitable, and I'm okay with that. The behavior of <code>f</code> changed, and the test which checks the behavior of <code>f</code> failed; that's just your test suite working as intended.</p>
+<p>Sometimes, this coupling is not justifiable. For example, suppose the hello world function <code>f</code> prints "hello world" to stdout by calling <code>print('hello world')</code> somewhere. If we change this call to <code>import sys; sys.stdout.write('hello world')</code>, obviously <code>f</code> still works. It still prints "hello world" to stdout. Now, if <code>test_that_f_prints_hello_world</code> fails (in other words, if <code>f</code> is coupled to <code>test_that_f_prints_hello_world1</code> with respect to changing <code>print</code> to <code>sys.stdout.write</code> in <code>f</code>), that's a false failure. After all, the behavior of <code>f</code> hasn't changed in any way, just its structure. It si precisely this kind of coupling which causes false failures. Moreover, in this post we'll show some methods to avoid this kind of coupling.</p>
+<p>Being coupled to automated tests with respect to <em>behavioral</em> changes: inevitable, good, expected</p>
+<p>Being coupled to automated tests with respect to <em>structural</em> changes: unnecessary, time-consuming, (rightly) reduces trust in your test suite</p>
+<h2 id="how-to-avoid-coupling-to-tests-with-respect-to-structural-changes">How to avoid coupling to tests with respect to structural changes</h2>
+<p>The key to avoiding unnecessary coupling to implementation details is the following truism: "test code is code". Any tool you have in your arsenal to achieve loose coupling in "regular" code can also be used to decouple your test suite from implementation details. Most of the strategies I'll mention ultimately follow from applying some well-known principle to automated tests.</p>
+<ul>
+<li>test interfaces, not concrete implementations</li>
+<li><a href="https://tyrrrz.me/blog/unit-testing-is-overrated">increase the scope of your test</a></li>
+<li>spec pattern</li>
+<li><a href="https://tyrrrz.me/blog/fakes-over-mocks">prefer fakes over mocks</a></li>
+<li><a href="https://hynek.me/articles/what-to-mock-in-5-mins/">don't fake what you don't own</a></li>
+</ul>
+<h1 id="test-interfaces-not-concrete-implementations">Test interfaces, not concrete implementations</h1>
+<h1 id="increase-the-scope-of-your-test">Increase the scope of your test</h1>
+<h1 id="spec-pattern">Spec pattern</h1>
+<h1 id="prefer-fakes-over-mocks">Prefer fakes over mocks</h1>
+<h1 id="don-t-fake-what-you-don-t-own">Don't fake what you don't own</h1>
+<p>Suppose you're implementing some public transport planning application, and your users are complaining that when they use your app they tend to forget to look outside to see if they need to bring an umbrella. You decide to help them out by adding clothing suggestions to your suggested routes. Simple enough, if your user asks for a route from A to B starting at 5:30PM, you do your usual computations, suggest them "Take bus 9 at 5:32PM", and you call out to some weather api to see if it's raining at 5:32PM. If it is, your app will suggest "Take bus 9 at 5:32PM, and bring an umbrella".</p>
+<p>Thankfully, the good folks over at <code>weknowtheweather.com</code> publish a library containing a client class <code>Weather</code> for their API. It has a method <code>is_it_raining</code>, taking a time and a location in the form of GPS coordinates, and returning a boolean which tells whether it's raining then and there. You dutifully include it in your route planning routine somewhere. Maybe, on some high level it used to look something like</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">plan_route</span><span>(
+</span><span>    </span><span style="color:#bf616a;">from_</span><span>: Location, 
+</span><span>    </span><span style="color:#bf616a;">to</span><span>: Location, 
+</span><span>    </span><span style="color:#bf616a;">time</span><span>: datetime,
+</span><span>) -&gt; PlannedRoute:
+</span><span>    </span><span style="color:#d08770;">...
+</span></code></pre>
+<p>and after the change, it looks like</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">plan_route</span><span>(
+</span><span>    </span><span style="color:#bf616a;">from_</span><span>: Location, 
+</span><span>    </span><span style="color:#bf616a;">to</span><span>: Location, 
+</span><span>    </span><span style="color:#bf616a;">time</span><span>: datetime, 
+</span><span>    </span><span style="color:#bf616a;">weather_api</span><span>: Weather,
+</span><span>) -&gt; PlannedRoute:
+</span><span>    </span><span style="color:#d08770;">...
+</span></code></pre>
+<p>with <code>PlannedRoute</code> now containing some info on umbrellas.</p>
+<p>Since you're a decent person (and more importantly, because you dislike flaky tests), you decide to write a fake version of <code>Weather</code> for use in your automated tests and your build pipelines. That is, you go directly against the advice of this section, you fake the <code>Weather</code> class, which you do not own. Your fake implementation looks exactly like their class (it has to, otherwise you couldn't substitute it for the real thing in your tests):</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">FakeWeather</span><span style="color:#eff1f5;">:
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">is_it_raining</span><span>(</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">time</span><span>: datetime, </span><span style="color:#bf616a;">at</span><span>: str) -&gt; bool:
+</span><span>        </span><span style="color:#d08770;">...
+</span></code></pre>
+<p>This all works quite well, your users are happy with the umbrella feature, and you forget about it for a while. Then, disaster strikes. The <code>weknowtheweather.com</code> library contains a critical security flaw, and the fix is a couple major versions ahead of the one you're using. Annoyingly, the good folks over at <code>weknowtheweather.com</code> decided to make a backwards-incompatible change in their <code>Weather</code> class. Aside from the critical security patch, the <code>is_it_raining</code> method has been renamed to <code>check_rain_status</code>.</p>
+<p>In order for things to keep on working with this new version of the weather library, you now have to change two things: the <code>FakeWeather</code> class (<code>git commit -m 'Fix tests'</code>), and the <code>plan_route</code> routine. That is to say, your unit tests are coupled to the weather library with respect to name changes of <code>Weather.is_it_raining</code>.</p>
+<p>Let's see what taking the advice in this section entails. It will get a bit verbose. Probably, the approach would look a little bit like this</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">MyWeather</span><span style="color:#eff1f5;">(</span><span style="color:#a3be8c;">ABC</span><span style="color:#eff1f5;">):
+</span><span>    @</span><span style="color:#bf616a;">abstractmethod
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">is_it_raining</span><span>(</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">time</span><span>: datetime, </span><span style="color:#bf616a;">at</span><span>: Location) -&gt; bool:
+</span><span>        </span><span style="color:#b48ead;">pass
+</span><span>
+</span><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">MyWeatherAdapter</span><span style="color:#eff1f5;">(</span><span style="color:#a3be8c;">MyWeather</span><span style="color:#eff1f5;">):
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#96b5b4;">__init__</span><span>(</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">weather</span><span>: Weather):
+</span><span>        </span><span style="color:#bf616a;">self</span><span>._weather = weather
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">is_it_raining</span><span>(</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">time</span><span>: datetime, </span><span style="color:#bf616a;">at</span><span>: Location) -&gt; bool:
+</span><span>        gps_string = </span><span style="color:#bf616a;">convert_our_location_to_gps_string</span><span>(at)
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">self</span><span>._weather.</span><span style="color:#bf616a;">is_it_raining</span><span>(time, gps_string)
+</span><span>
+</span><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">MyFakeWeather</span><span style="color:#eff1f5;">(</span><span style="color:#a3be8c;">MyWeather</span><span style="color:#eff1f5;">):
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">is_it_raining</span><span>(</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">time</span><span>: datetime, </span><span style="color:#bf616a;">at</span><span>: Location) -&gt; bool:
+</span><span>        </span><span style="color:#65737e;"># pretty much the same implementation as FakeWeather
+</span><span>        </span><span style="color:#d08770;">...
+</span><span>        
+</span></code></pre>
+<p>And instead of injecting <code>Weather</code> into <code>plan_route</code>, you inject an instance of the <code>MyWeather</code> interface:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">plan_route</span><span>(
+</span><span>    </span><span style="color:#bf616a;">from_</span><span>: Location, 
+</span><span>    </span><span style="color:#bf616a;">to</span><span>: Location, 
+</span><span>    </span><span style="color:#bf616a;">time</span><span>: datetime, 
+</span><span>    </span><span style="color:#bf616a;">weather_api</span><span>: MyWeather,
+</span><span>) -&gt; PlannedRoute:
+</span><span>    </span><span style="color:#d08770;">...
+</span></code></pre>
+<p>Now, if the good folks over at <code>weknowtheweather.com</code> decide to rename <code>is_it_raining</code> to <code>check_rain_status</code>, only one class changes, namely the adapter:</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">MyWeatherAdapter</span><span style="color:#eff1f5;">(</span><span style="color:#a3be8c;">MyWeather</span><span style="color:#eff1f5;">):
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#96b5b4;">__init__</span><span>(</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">weather</span><span>: Weather):
+</span><span>        </span><span style="color:#bf616a;">self</span><span>._weather = weather
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">is_it_raining</span><span>(</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">time</span><span>: datetime, </span><span style="color:#bf616a;">at</span><span>: Location) -&gt; bool:
+</span><span>        gps_string = </span><span style="color:#bf616a;">convert_our_location_to_gps_string</span><span>(at)
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">self</span><span>._weather.</span><span style="color:#bf616a;">check_rain_status</span><span>(time, gps_string)
+</span></code></pre>
+<p>The tests stay unchanged. An added benefit is that the <code>plan_route</code> routine is unchanged as well, which is means you have a lower risk of introducing bugs there. Fewer changes to make, happier developer.</p>
+<p>Ah but wait, it seems all is not well with this approach. Let's assume we have no static type check in our build pipeline. Nothing would've stopped us from merging the major <code>Weather</code> version bump without changing the adapter. After all, not a single test hits it.</p>
+
+
+    </div>
+    </section>
+</body>
+
+</html>

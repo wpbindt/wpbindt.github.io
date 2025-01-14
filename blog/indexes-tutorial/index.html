@@ -1,0 +1,89 @@
+<!DOCTYPE=html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>My blog</title>
+    <link rel="stylesheet" href="https://wpbindt.github.io/main.css">
+</head>
+
+<body>
+    <section class="section">
+    <div class="container">
+        
+<h1 class="title">A guided tour through (B-tree) indexes</h1>
+<p class="subtitle"><strong>2025-01-04</strong></p>
+<h3 id="general-structure">General structure</h3>
+<h4 id="talk-15-mins">Talk (15 mins)</h4>
+<p><strong>Main point</strong>: reading is faster, writing is slower, compound indexes are a thing.</p>
+<h4 id="lab-30-mins">Lab (30 mins)</h4>
+<p><strong>Main point</strong>: get everyone to a point where they are confident to actively participate in a group discussion on indices.</p>
+<p>In triples or pairs, depending on how large a fraction of the audience considers themselves comfortable with indexes (triples if few, pairs if many, or maybe just triples regardless). Participants should have access to an instance of MongoDB or PostgreSQL filled with example data (maybe both?). The idea is to have a bunch of questions on the theory of indices, the answers to which the participants can verify using the example database.</p>
+<h4 id="group-discussion-25-mins">Group discussion (25 mins)</h4>
+<p><strong>Main point</strong>: apply the theory to your own applications.</p>
+<p>Probably in two or three groups, depending on the number of participants. Maybe one group per team. Idea is to discuss what's been learned in light of queries in the particpants' own codebases. Should be very loose, but with some leading questions to get the conversation started.</p>
+<h4 id="plenary-discussion-5-mins">Plenary discussion (5 mins)</h4>
+<p><strong>Main point</strong>: spread the insights gained from the group discussion.</p>
+<p>Back to one single group, and participants from the groups from the previous section share (if they want) what they learned.</p>
+<h3 id="talk">Talk</h3>
+<ul>
+<li>Definition of B tree (as vague as possible without losing ability to reason about B-trees</li>
+<li>Illustrate with picture of B-tree, showing how to read, and how to write (ish)</li>
+<li>Some bladibla about disk reads and pages, maybe</li>
+<li>Relation to MongoDB, PostgreSQL, Redis</li>
+<li>BSON?</li>
+</ul>
+<h3 id="lab">Lab</h3>
+<ul>
+<li>What is the maximal height of a B-tree with n keys?</li>
+<li>If page size is 4kb, how much can you store on a tree with 4 layers?</li>
+<li>CQRS?</li>
+<li><code>WHERE</code></li>
+<li>sorting</li>
+<li>range queries</li>
+<li>why not just index all the things?</li>
+<li>projections</li>
+<li>consider different shapes of data. Many a's for few b's, unique b for every a, etc</li>
+<li>Consider the sort order in compound indexes, and the effect it has on queries</li>
+<li>Illustrate ESR rule of thumb</li>
+</ul>
+<h4 id="single-index">Single index</h4>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">WHERE</span><span> a=</span><span style="color:#d08770;">3
+</span></code></pre>
+<p>filler</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">WHERE </span><span style="color:#d08770;">1 </span><span>&lt;= unindexed_column &lt; </span><span style="color:#d08770;">3
+</span></code></pre>
+<p>filler</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">ORDER BY</span><span> indexed_column
+</span></code></pre>
+<p>filler</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT</span><span> a </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">WHERE</span><span> a=</span><span style="color:#d08770;">3</span><span>;
+</span></code></pre>
+<h4 id="compound-indexes">Compound indexes</h4>
+<p>Run</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">WHERE</span><span> a=</span><span style="color:#d08770;">3 </span><span>AND b=</span><span style="color:#d08770;">5</span><span>;
+</span></code></pre>
+<p>with no index, index on <code>a</code> and <code>b</code> separately, <code>(a, b)</code>, one on <code>(b, c)</code>, and one on <code>(a, b, c)</code>, and one on <code>(c, a, b)</code>.</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">WHERE</span><span> a &lt; </span><span style="color:#d08770;">3</span><span>;
+</span></code></pre>
+<p>filler</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">WHERE</span><span> a &lt; </span><span style="color:#d08770;">3 </span><span>AND b &gt; </span><span style="color:#d08770;">1</span><span>;
+</span></code></pre>
+<p>filler</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">WHERE</span><span> a = </span><span style="color:#d08770;">3 </span><span style="color:#b48ead;">ORDER BY</span><span> b;
+</span></code></pre>
+<p>filler</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> table </span><span style="color:#b48ead;">ORDER BY</span><span> a
+</span></code></pre>
+<p>Sort order of indexes</p>
+<h3 id="group-discussion">Group discussion</h3>
+<ul>
+<li>Find a read query in your codebase, and discuss what indexes it might benefit from. How do these indices affect parts of your codebase that write to this table? Find concrete examples.</li>
+</ul>
+
+
+    </div>
+    </section>
+</body>
+
+</html>
