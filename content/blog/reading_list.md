@@ -80,6 +80,9 @@ Also known as an onion architecture, or the ports and adapters architecture. Rou
 ### [Jepsen analyses](https://jepsen.io/analyses)
 Fun analyses on the correctness of databases. This is the right place to find out where your personal database vendor is lacking, because some database vendors have been less than honest in their documentation in representing for example their ACID-compliance, even after being called out by a Jepsen analysis. These are serious analyses, but they're written with a sense of humor.
 
+### [Starbucks Does Not Use Two-Phase Commit](https://www.enterpriseintegrationpatterns.com/ramblings/18_starbucks.html)
+A nice analogy illustrating why distributed transactions don't scale well. For a more in-depth explanation, see the relevant section in _Designing Data-Intensive Applications_ or _Microservices Patterns_.
+
 ## Videos
 ### [Missing semester, git lecture](https://youtu.be/2sjqTHE0zok?si=NHen99qWwpVuZ-lP)
 In general, the lectures from the missing semester are good, but especially the git lecture is very useful to watch. The [course homepage](https://missing.csail.mit.edu/) also contains notes for all of the lectures, which include hands-on exercises.
